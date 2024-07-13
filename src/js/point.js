@@ -10,6 +10,12 @@ export class Point {
         return this;
     }
 
+    subtract(point){
+        this.x -= point.x;
+        this.y -= point.y;
+        return this;
+    }
+
     reduce(value){
         this.x *= value;
         this.y *= value;
