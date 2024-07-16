@@ -1,14 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './css/index.css';
-import App from './js/App';
+import './css/home/ocean.css';
+import './css/home/bubble.css';
+// import App from './js/App';
+import Ocean from './js/home/ocean';
 import reportWebVitals from './reportWebVitals';
 
 const body = ReactDOM.createRoot(document.querySelector('body'));
 body.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+  <Ocean />
 );
 
 // If you want to start measuring performance in your app, pass a function
