@@ -14,7 +14,8 @@ export default class Ocean extends Component{
                 width: document.body.clientWidth,
                 height: document.body.clientHeight
             },
-            bubbles: [1,2,3,4]
+            exist: true,
+            setExist: this.setExist.bind(this)
         }
         // 창 크기 변화 인식 후 그에 맞춰 화면 재구성
         window.addEventListener('resize', this.resize.bind(this), false);
@@ -39,18 +40,24 @@ export default class Ocean extends Component{
         }, false);
     }
 
+    setExist = value => {
+        this.setState({ exist: value });
+    }
+
     resize(){
         // 창 크기 변화에 따라 너비 높이 전달
         this.setState(prevState=>({stage: {...prevState.stage, width: document.body.clientWidth}}));
         this.setState(prevState=>({stage: {...prevState.stage, height: document.body.clientHeight}}));
     }
+
     count = [
         {
 
         }
     ];
+
     render(){
-        console.log(this.state.z)
+        console.log("부모의견 :"+this.state.exist)
         return(
             <div id="Ocean">
                 {this.count.map((c,i) => {
@@ -60,6 +67,8 @@ export default class Ocean extends Component{
                                 z={this.state.z}
                                 stage={this.state.stage}
                                 index={i}
+                                exist={this.state.exist}
+                                setExist={this.state.setExist}
                             />
                         )
                     }else{

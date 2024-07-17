@@ -1,7 +1,7 @@
 .bubble{
     position: absolute;
-    background-color: #7fffd485;
     transform: translate(-50%, -50%);
     border-radius: 50%;
     transition: .5s;
+    background-color: rgb(128, 255, 212);
 }
