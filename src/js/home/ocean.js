@@ -1,6 +1,10 @@
 import React, { Component } from "react";
 import Bubble from "./bubble.js";
 
+let count = [
+    {},{},{}
+];
+
 export default class Ocean extends Component{
     constructor(props){
         super(props);
@@ -14,6 +18,7 @@ export default class Ocean extends Component{
                 width: document.body.clientWidth,
                 height: document.body.clientHeight
             },
+            controller: [],
             exist: true,
             setExist: this.setExist.bind(this)
         }
@@ -50,17 +55,25 @@ export default class Ocean extends Component{
         this.setState(prevState=>({stage: {...prevState.stage, height: document.body.clientHeight}}));
     }
 
-    count = [
-        {
 
+    componentDidMount(){
+        this.buildController();
+    }
+
+    buildController(){
+        let newController = [];
+        for(let c=0; c < count.length; c++){
+            newController.push(new Array)
         }
-    ];
+        this.setState({controller:newController});
+    };
 
     render(){
+        console.log(this.state.controller)
         console.log("부모의견 :"+this.state.exist)
         return(
             <div id="Ocean">
-                {this.count.map((c,i) => {
+                {count.map((c,i) => {
                     if(true){
                         return(
                             <Bubble 
