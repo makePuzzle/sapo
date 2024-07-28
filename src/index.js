@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './css/index.css';
 import './css/home/ocean.css';
 import './css/home/bubble.css';
+import './css/home/field.css';
 // import App from './js/App';
 import Ocean from './js/home/ocean.js';
 import reportWebVitals from './reportWebVitals';

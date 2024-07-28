@@ -4,16 +4,19 @@ export default class Bubble extends Component{
     constructor(props){
         super(props);
         this.state={
+            color: this.props.color,
             location:{
                 x: Math.random() - 0.5,
                 y: Math.random() - 0.5
             },
             exist: this.props.exist,
-            z_left: this.props.z.max - this.props.z.cur <= 0 ? 1 : this.props.z.max - this.props.z.cur
+            z_left: this.props.z.max - this.props.z.cur <= 0 ? 1 : this.props.z.max - this.props.z.cur,
+            setField: this.props.setField
         }
     }
 
     componentDidUpdate(prevProps, prevState){
+        // z값(스크롤)에 변화가 생기면
         if(prevProps.z !== this.props.z){
             this.setState({ z_left: this.props.z.max - this.props.z.cur <= 0 ? 1 : this.props.z.max - this.props.z.cur });
             if(
@@ -45,16 +48,71 @@ export default class Bubble extends Component{
         }
     }
 
+    bubblePop(e){
+        const bubble = e.target;
+        // bubble style 순서
+        // width, height, left, top, opacity, box-shadow, background-color
+        // 즉시 살짝 커짐, 투명도 유지
+        bubble.setAttribute('style', `
+            ${bubble.style[0]}: ${bubble.style[bubble.style[0]]};
+            ${bubble.style[1]}: ${bubble.style[bubble.style[1]]};
+            ${bubble.style[2]}: ${bubble.style[bubble.style[2]]};
+            ${bubble.style[3]}: ${bubble.style[bubble.style[3]]};
+            ${bubble.style[4]}: ${bubble.style[bubble.style[4]] * 1};
+            ${bubble.style[5]}: ${bubble.style[bubble.style[5]]};
+            ${bubble.style[6]}: ${bubble.style[bubble.style[6]]};
+            transform: translate(-50%,-50%) scale(1.4);
+            z-index: 1000;
+        `);
+        // 0.5초 뒤 살짝 작아짐, 투명도 남은 수치의 50% 만큼 증가
+        setTimeout(()=>{
+            bubble.setAttribute('style', `
+                ${bubble.style[0]}: ${bubble.style[bubble.style[0]]};
+                ${bubble.style[1]}: ${bubble.style[bubble.style[1]]};
+                ${bubble.style[2]}: ${bubble.style[bubble.style[2]]};
+                ${bubble.style[3]}: ${bubble.style[bubble.style[3]]};
+                ${bubble.style[4]}: ${bubble.style[bubble.style[4]] / 2 + 0.5};
+                ${bubble.style[5]}: ${bubble.style[bubble.style[5]]};
+                ${bubble.style[6]}: ${bubble.style[bubble.style[6]]};
+                transform: translate(-50%,-50%) scale(0.7);
+                z-index: 1000;
+            `);
+        }, 400)
+        // 1초 뒤 화면을 가득 채움, 투명도 없음
+        setTimeout(()=>{
+            bubble.setAttribute('style', `
+                ${bubble.style[0]}: ${bubble.style[bubble.style[0]]};
+                ${bubble.style[1]}: ${bubble.style[bubble.style[1]]};
+                ${bubble.style[2]}: ${bubble.style[bubble.style[2]]};
+                ${bubble.style[3]}: ${bubble.style[bubble.style[3]]};
+                ${bubble.style[4]}: 100%;
+                ${bubble.style[5]}: ${bubble.style[bubble.style[5]]};
+                ${bubble.style[6]}: ${bubble.style[bubble.style[6]]};
+                transform: translate(-50%,-50%) scale(60);
+                z-index: 1000;
+            `);
+        }, 900)
+        // 1초 뒤 화면을 가득 채움, 투명도 없음
+        setTimeout(()=>{
+            this.state.setField(`${this.state.color}`, 1, true, bubble)
+        }, 1100)
+    }
+
     render(){
         return(
-            <div className="bubble" style={{
-                width: `calc(1000px / ${this.state.z_left})`, 
-                height: `calc(1000px / ${this.state.z_left})`,
-                left: `calc(50% + ${this.state.location.x / this.state.z_left} * 500%)`,
-                top: `calc(50% + ${this.state.location.y / this.state.z_left} * 500%)`,
-                opacity: `${4 / this.state.z_left}`,
-                boxShadow: `0 0 ${this.state.z_left / 4}px 14px rgb(128, 255, 212)`
-            }}></div>
+            <div 
+                className="bubble" 
+                style={{
+                    width: `calc(1000px / ${this.state.z_left})`, 
+                    height: `calc(1000px / ${this.state.z_left})`,
+                    left: `calc(50% + ${this.state.location.x / this.state.z_left} * 500%)`,
+                    top: `calc(50% + ${this.state.location.y / this.state.z_left} * 500%)`,
+                    opacity: `${4 / this.state.z_left}`,
+                    boxShadow: `0 0 ${this.state.z_left / 4}px 14px ${this.state.color}`,
+                    backgroundColor: `${this.state.color}`
+                }}
+                onClick={(e)=>{this.bubblePop(e)}}
+            ></div>
         )
     }
 }

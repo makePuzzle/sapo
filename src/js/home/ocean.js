@@ -1,8 +1,15 @@
 import React, { Component } from "react";
 import Bubble from "./bubble.js";
+import Field from "./field.js";
 
 let count = [
-    {},{},{}
+    {
+        color:"#ff9380"
+    },{
+        color:"#80ff8b"
+    },{
+        color:"#8880ff"
+    }
 ];
 
 export default class Ocean extends Component{
@@ -20,7 +27,14 @@ export default class Ocean extends Component{
             },
             controller: [],
             exist: true,
-            setExist: this.setExist.bind(this)
+            setExist: this.setExist.bind(this),
+            field:{
+                color: "#000000",
+                opacity: 0,
+                open: false,
+                bubble: ''
+            },
+            setField: this.setField.bind(this)
         }
         // 창 크기 변화 인식 후 그에 맞춰 화면 재구성
         window.addEventListener('resize', this.resize.bind(this), false);
@@ -55,39 +69,50 @@ export default class Ocean extends Component{
         this.setState(prevState=>({stage: {...prevState.stage, height: document.body.clientHeight}}));
     }
 
-
+    // 컴퍼넌트 첫 로드 시 buildController 실행
     componentDidMount(){
         this.buildController();
     }
 
+    // 읽어온 버블의 갯수만큼 컨트롤러에 각 버블컨트롤 내역을 저장할 배열 생성
     buildController(){
-        let newController = [];
-        for(let c=0; c < count.length; c++){
-            newController.push(new Array)
-        }
-        this.setState({controller:newController});
+        // let newController = [];
+        // for(let c=0; c < count.length; c++){
+        //     newController.push(new Array)
+        // }
+        this.setState({controller:count});
     };
+
+    setField(color, opacity, open, bubble){
+        this.setState({field:{color:color, opacity:opacity, open:open, bubble:bubble}})
+    }
 
     render(){
         console.log(this.state.controller)
         console.log("부모의견 :"+this.state.exist)
         return(
             <div id="Ocean">
-                {count.map((c,i) => {
+                {this.state.controller.map((d,i) => {
                     if(true){
                         return(
                             <Bubble 
+                                index={i}
+                                color={d.color}
                                 z={this.state.z}
                                 stage={this.state.stage}
-                                index={i}
                                 exist={this.state.exist}
                                 setExist={this.state.setExist}
+                                setField={this.state.setField}
                             />
                         )
                     }else{
                         return undefined
                     }
                 })}
+                <Field
+                    field={this.state.field}
+                    setField={this.state.setField}
+                />
             </div>
         )
     }
