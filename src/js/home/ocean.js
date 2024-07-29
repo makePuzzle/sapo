@@ -4,11 +4,17 @@ import Field from "./field.js";
 
 let count = [
     {
-        color:"#ff9380"
+        index:1,
+        color:"#ff9380",
+        title:"나 또한 누군가의 스승이 된다."
     },{
-        color:"#80ff8b"
+        index:2,
+        color:"#80ff8b",
+        title:"배움이란 모방에서 시작해 독창으로 나아가는 과정이다."
     },{
-        color:"#8880ff"
+        index:3,
+        color:"#8880ff",
+        title:"상대방의 허물을 지적하는 일은 나의 죄를 고하듯 조심스러워야 한다."
     }
 ];
 
@@ -29,10 +35,14 @@ export default class Ocean extends Component{
             exist: true,
             setExist: this.setExist.bind(this),
             field:{
-                color: "#000000",
+                data: {
+                    index:0,
+                    color:"",
+                    title:""
+                },
                 opacity: 0,
                 open: false,
-                bubble: ''
+                bubbleDOM: ''
             },
             setField: this.setField.bind(this)
         }
@@ -74,17 +84,13 @@ export default class Ocean extends Component{
         this.buildController();
     }
 
-    // 읽어온 버블의 갯수만큼 컨트롤러에 각 버블컨트롤 내역을 저장할 배열 생성
+    // 읽어온 버블의 갯수만큼 컨트롤러에 각 버블컨트롤 내역을 저장
     buildController(){
-        // let newController = [];
-        // for(let c=0; c < count.length; c++){
-        //     newController.push(new Array)
-        // }
         this.setState({controller:count});
     };
 
-    setField(color, opacity, open, bubble){
-        this.setState({field:{color:color, opacity:opacity, open:open, bubble:bubble}})
+    setField(data, opacity, open, bubbleDOM){
+        this.setState({field:{data:data, opacity:opacity, open:open, bubbleDOM:bubbleDOM}})
     }
 
     render(){
@@ -92,12 +98,12 @@ export default class Ocean extends Component{
         console.log("부모의견 :"+this.state.exist)
         return(
             <div id="Ocean">
-                {this.state.controller.map((d,i) => {
+                {this.state.controller.map((data,i) => {
                     if(true){
                         return(
                             <Bubble 
                                 index={i}
-                                color={d.color}
+                                data={data}
                                 z={this.state.z}
                                 stage={this.state.stage}
                                 exist={this.state.exist}

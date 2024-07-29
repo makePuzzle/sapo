@@ -7,10 +7,13 @@ import './css/home/field.css';
 // import App from './js/App';
 import Ocean from './js/home/ocean.js';
 import reportWebVitals from './reportWebVitals';
+import { BrowserRouter } from "react-router-dom";
 
 const body = ReactDOM.createRoot(document.querySelector('body'));
 body.render(
-  <Ocean />
+  <BrowserRouter>
+    <Ocean />
+  </BrowserRouter>
 );
 
 // If you want to start measuring performance in your app, pass a function

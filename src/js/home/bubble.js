@@ -1,10 +1,11 @@
 import { Component } from "react";
+import { Link } from "react-router-dom";
 
 export default class Bubble extends Component{
     constructor(props){
         super(props);
         this.state={
-            color: this.props.color,
+            data: this.props.data,
             location:{
                 x: Math.random() - 0.5,
                 y: Math.random() - 0.5
@@ -94,13 +95,14 @@ export default class Bubble extends Component{
         }, 900)
         // 1초 뒤 화면을 가득 채움, 투명도 없음
         setTimeout(()=>{
-            this.state.setField(`${this.state.color}`, 1, true, bubble)
+            this.state.setField(this.state.data, 1, true, bubble)
         }, 1100)
     }
 
     render(){
         return(
-            <div 
+            <Link 
+                to={`/${(this.state.data.index < 10) ? '0' + this.state.data.index.toString() : this.state.data.index.toString()}`}
                 className="bubble" 
                 style={{
                     width: `calc(1000px / ${this.state.z_left})`, 
@@ -108,11 +110,11 @@ export default class Bubble extends Component{
                     left: `calc(50% + ${this.state.location.x / this.state.z_left} * 500%)`,
                     top: `calc(50% + ${this.state.location.y / this.state.z_left} * 500%)`,
                     opacity: `${4 / this.state.z_left}`,
-                    boxShadow: `0 0 ${this.state.z_left / 4}px 14px ${this.state.color}`,
-                    backgroundColor: `${this.state.color}`
+                    boxShadow: `0 0 ${this.state.z_left / 4}px 14px ${this.state.data.color}`,
+                    backgroundColor: `${this.state.data.color}`
                 }}
                 onClick={(e)=>{this.bubblePop(e)}}
-            ></div>
+            ></Link>
         )
     }
 }
