@@ -6,15 +6,15 @@ let count = [
     {
         index:1,
         color:"#ff9380",
-        title:"나 또한 누군가의 스승이 된다."
+        title:"wood worm"
     },{
         index:2,
         color:"#80ff8b",
-        title:"배움이란 모방에서 시작해 독창으로 나아가는 과정이다."
+        title:""
     },{
         index:3,
         color:"#8880ff",
-        title:"상대방의 허물을 지적하는 일은 나의 죄를 고하듯 조심스러워야 한다."
+        title:""
     }
 ];
 

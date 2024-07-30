@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import { ArrowBackCircleOutline } from "react-ionicons";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Link } from "react-router-dom";
 import App_01 from '../ideas/01/app.js';
 import App_02 from '../ideas/02/app.js';
 import App_03 from '../ideas/03/app.js';
@@ -15,7 +15,6 @@ export default class Field extends Component{
         // 창 크기 변화 인식 후 그에 맞춰 화면 재구성
         window.addEventListener("resize", this.resize.bind(this), false);
         this.resize();
-
     }
 
     resize(){
@@ -66,6 +65,11 @@ export default class Field extends Component{
             z-index: 2;
             `);
         }, 500)
+        const fieldDOM = document.getElementById("Field");
+        const canvasDOM = fieldDOM.getElementsByTagName("canvas")[0];
+        if(canvasDOM){
+            canvasDOM.remove();
+        }
     }
 
     render(){
@@ -78,15 +82,16 @@ export default class Field extends Component{
                     opacity: `${this.state.field.opacity}`,
                     zIndex: `${this.state.field.open ? 1001 : 1}`
                 }}
-                // className={this.state.field.data.index}
             >
-                <ArrowBackCircleOutline
-                    color={'#24242b'}
-                    height="40px"
-                    width="40px"
-                    onClick={()=>{this.fieldPop()}}
-                    style={{cursor:"pointer", position:"absolute", top:"6px", left:"10px"}}
-                />
+                <Link to="/">
+                    <ArrowBackCircleOutline
+                        color={'#24242b'}
+                        height="40px"
+                        width="40px"
+                        onClick={()=>{this.fieldPop()}}
+                        style={{cursor:"pointer", position:"absolute", top:"6px", left:"10px"}}
+                    />
+                </Link>
                 <Routes>
                     <Route path="/01" element={ <App_01 /> }></Route>
                     <Route path="/02" element={ <App_02 /> }></Route>
