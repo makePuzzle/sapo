@@ -5,14 +5,17 @@ import Field from "./field.js";
 let count = [
     {
         index:1,
+        depth: 450,
         color:"#ff9380",
         title:"wood worm"
     },{
         index:2,
+        depth: 440,
         color:"#80ff8b",
         title:""
     },{
         index:3,
+        depth: 430,
         color:"#8880ff",
         title:""
     }
@@ -37,6 +40,7 @@ export default class Ocean extends Component{
             field:{
                 data: {
                     index:0,
+                    depth: 0,
                     color:"",
                     title:""
                 },

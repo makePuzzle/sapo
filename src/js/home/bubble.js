@@ -100,17 +100,21 @@ export default class Bubble extends Component{
     }
 
     render(){
+        console.log(`z_left: ${this.state.z_left}`);
+        console.log(`depth: ${this.state.data.depth}`);
+        const z_left_by_depth = (this.props.z.max - this.props.z.cur <= 0 ? 1 : this.props.z.max - this.props.z.cur) - this.props.data.depth;
+        console.log(z_left_by_depth)
         return(
             <Link 
                 to={`/${(this.state.data.index < 10) ? '0' + this.state.data.index.toString() : this.state.data.index.toString()}`}
                 className="bubble" 
                 style={{
-                    width: `calc(1000px / ${this.state.z_left})`, 
-                    height: `calc(1000px / ${this.state.z_left})`,
-                    left: `calc(50% + ${this.state.location.x / this.state.z_left} * 500%)`,
-                    top: `calc(50% + ${this.state.location.y / this.state.z_left} * 500%)`,
-                    opacity: `${4 / this.state.z_left}`,
-                    boxShadow: `0 0 ${this.state.z_left / 4}px 14px ${this.state.data.color}`,
+                    width: `calc(1000px / ${z_left_by_depth})`, 
+                    height: `calc(1000px / ${z_left_by_depth})`,
+                    left: `calc(50% + ${this.state.location.x / z_left_by_depth} * 500%)`,
+                    top: `calc(50% + ${this.state.location.y / z_left_by_depth} * 500%)`,
+                    opacity: `${4 / z_left_by_depth}`,
+                    boxShadow: `0 0 ${z_left_by_depth / 4}px 14px ${this.state.data.color}`,
                     backgroundColor: `${this.state.data.color}`
                 }}
                 onClick={(e)=>{this.bubblePop(e)}}
