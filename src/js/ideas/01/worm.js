@@ -1,20 +1,32 @@
 export class Worm {
-    constructor(width, height, x, y){
-        this.width = width;
-        this.height = height;
-        this.x = x;
-        this.y = y;
-        this.maxX = width + x;
-        this.maxY = height + y;
+    constructor(x, y){
+        this.x = x || 0;
+        this.y = y || 0;
     }
 
-    draw(ctx){
-        const xGap = 80;
-        const yGap = 60;
+    moveRight(){
+        if(this.x <= 16){
+            this.x += 1;
+        }
+        return this;
+    }
 
-        ctx.fillStyle = '#000000';
-        ctx.beginPath();
-        ctx.rect(this.x, this.y, this.width, this.height);
-        ctx.fill();
+    moveLeft(){
+        this.x -= 1;
+        return this;
+    }
+
+    moveDown(){
+        this.y += 1;
+        return this;
+    }
+
+    moveUp(){
+        this.y -= 1;
+        return this;
+    }
+
+    clone(){
+        return new Worm(this.x, this.y);
     }
 }

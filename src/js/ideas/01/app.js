@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Worm } from "./worm.js";
+import { Dialog } from "./dialog.js";
 
 export default class App_01 extends Component{
     constructor(props){
@@ -10,22 +11,21 @@ export default class App_01 extends Component{
         this.fieldDOM = document.getElementById("Field");
         this.fieldDOM.appendChild(this.canvas);
         this.ctx = this.canvas.getContext("2d");
-
-        // // Dialog들이 들어있는 items 배열 구성
-        // this.items = [];
-        // this.total = 1;
-        // for(let i = 0; i < this.total; i++){
-        //     // this.items[i] = new Dialog();
-        // }
         
+        this.pressKey = null;
+        this.wormCord = new Worm();
+
+        // Dialog들이 들어있는 items 배열 구성
+        this.dialog = new Dialog();
+
         // 창 크기 변화 인식 후 그에 맞춰 화면 재구성
         window.addEventListener('resize', this.resize.bind(this), false);
         this.resize();
-
-        // worm 생성 (width, height, x, y)
-        this.worm = new Worm(300,300,300,450)
     
         window.requestAnimationFrame(this.animate.bind(this));
+
+        // 방향키 인식
+        document.addEventListener('keyup', this.arrowPress.bind(this), false);
     }
 
     resize(){
@@ -33,17 +33,43 @@ export default class App_01 extends Component{
         this.stageWidth = document.body.clientWidth;
         this.stageHeight = document.body.clientHeight;
 
-        this.canvas.width = this.stageWidth * 2;
-        this.canvas.height = this.stageHeight * 2;
+        this.canvas.width = this.stageWidth;
+        this.canvas.height = this.stageHeight;
     
         // context 설정
         this.ctx.scale = (2,2);
+
+        this.ctx.shadowOffsetX = 0;
+        this.ctx.shadowOffsetY = 3;
+        this.ctx.shadowBlur = 6;
+        this.ctx.shadowColor = `rgba(0, 0, 0, 0.1)`;
+
+        this.ctx.lineWidth = 2;
+
+        // Dialog > resize
+        this.dialog.resize(this.stageWidth, this.stageHeight);
     }
 
     animate(){
         window.requestAnimationFrame(this.animate.bind(this));
 
-        this.worm.draw(this.ctx);
+        this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
+
+        // Dialog > animate
+        this.dialog.animate(this.ctx);
+    }
+
+    arrowPress(e){
+        this.pressKey = e.key;
+
+        // 눌린 버튼이 방향키라면 this.startCord, this.prevCord, this.target 반환
+        // 눌린 버튼이 방향키가 아니면 null 반환
+        const dl = this.dialog.arrowKeyDown(this.pressKey);
+        if(dl){
+            console.log(dl)
+            // Dialog > resize
+            this.dialog.resize(this.stageWidth, this.stageHeight);
+        }
     }
 
     render(){
