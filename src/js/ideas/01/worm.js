@@ -5,9 +5,7 @@ export class Worm {
     }
 
     moveRight(){
-        if(this.x <= 16){
-            this.x += 1;
-        }
+        this.x += 1;
         return this;
     }
 

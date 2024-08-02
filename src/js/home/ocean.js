@@ -5,7 +5,7 @@ import Field from "./field.js";
 let count = [
     {
         index:1,
-        depth: 450,
+        depth: 480,
         color:"#ff9380",
         title:"wood worm"
     },{

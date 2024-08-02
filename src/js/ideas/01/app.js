@@ -30,21 +30,21 @@ export default class App_01 extends Component{
 
     resize(){
         // 브라우저 창 크기에 따른 canvas의 너비 높이 설정
-        this.stageWidth = document.body.clientWidth;
-        this.stageHeight = document.body.clientHeight;
-
+        if(document.body.clientHeight * 2 >= document.body.clientWidth){
+            this.stageWidth = document.body.clientWidth;
+            this.stageHeight = document.body.clientWidth / 2;
+        }else{
+            this.stageWidth = document.body.clientHeight * 2;
+            this.stageHeight = document.body.clientHeight;
+        }
         this.canvas.width = this.stageWidth;
         this.canvas.height = this.stageHeight;
+
+        console.log(this.canvas.width)
+        console.log(this.canvas.height)
     
         // context 설정
         this.ctx.scale = (2,2);
-
-        this.ctx.shadowOffsetX = 0;
-        this.ctx.shadowOffsetY = 3;
-        this.ctx.shadowBlur = 6;
-        this.ctx.shadowColor = `rgba(0, 0, 0, 0.1)`;
-
-        this.ctx.lineWidth = 2;
 
         // Dialog > resize
         this.dialog.resize(this.stageWidth, this.stageHeight);
@@ -66,7 +66,7 @@ export default class App_01 extends Component{
         // 눌린 버튼이 방향키가 아니면 null 반환
         const dl = this.dialog.arrowKeyDown(this.pressKey);
         if(dl){
-            console.log(dl)
+            console.log(dl.prev0Cord)
             // Dialog > resize
             this.dialog.resize(this.stageWidth, this.stageHeight);
         }
