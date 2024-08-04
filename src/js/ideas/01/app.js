@@ -9,7 +9,7 @@ export default class App_01 extends Component{
         //  canvas, context 생성
         this.canvas = document.createElement("canvas");
         this.fieldDOM = document.getElementById("Field");
-        this.fieldDOM.appendChild(this.canvas);
+        this.fieldDOM.insertBefore(this.canvas, this.fieldDOM.firstChild);
         this.ctx = this.canvas.getContext("2d");
         
         this.pressKey = null;
@@ -66,7 +66,6 @@ export default class App_01 extends Component{
         // 눌린 버튼이 방향키가 아니면 null 반환
         const dl = this.dialog.arrowKeyDown(this.pressKey);
         if(dl){
-            console.log(dl.prev0Cord)
             // Dialog > resize
             this.dialog.resize(this.stageWidth, this.stageHeight);
         }
@@ -74,7 +73,7 @@ export default class App_01 extends Component{
 
     render(){
         return(
-            <div>one 1</div>
+            <div></div>
         )
     }
 }
