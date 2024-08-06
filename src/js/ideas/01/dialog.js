@@ -11,6 +11,24 @@ const woodCords = [
     [8,10,true],[9,10,true],[10,10,true],[11,10,true],[12,10,true],
     [8,11,true],[9,11,true],[10,11,true],[11,11,true],[12,11,true]
 ];
+const quizLogic = {
+    leadCord: [21,6],
+    log:[
+        [-1,+1],[+0,+1],
+        [+0,+2],
+        [+0,+3],
+        [+0,+4],
+        [-1,+5],[+0,+5],[+1,+5]
+    ]
+}
+const quizCords = [
+    [21,6],
+    [20,7],[21,7],
+    [21,8],
+    [21,9],
+    [21,10],
+    [20,11],[21,11],[22,11]
+];
 
 export class Dialog{
     constructor(){
@@ -31,6 +49,27 @@ export class Dialog{
                 return this.stageHeight * cord / 15;
             }
         };
+        
+        this.isExistinArr = (arr1, arr2) => {
+            if (arr1[0] !== arr2[0]) {
+                return false;
+            };
+            if (arr1[1] !== arr2[1]) {
+                return false;
+            };
+            return true;
+        };
+
+        this.compare = (woodCords, quizLogic) => {
+            // 아직 벌레에게 먹히지 않은 나무 블록들의 좌표를 모은 배열 생성
+            let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
+            let leadCord_surv_x = surviveWoods[0][0];
+            let leadCord_surv_y = surviveWoods[0][1];
+
+            let answer = quizLogic.log.map(log => [leadCord_surv_x+log[0], leadCord_surv_y+log[1]]);
+            answer.unshift([leadCord_surv_x, leadCord_surv_y]);
+            console.log(answer)
+        }
     }
 
     resize(stageWidth, stageHeight){
@@ -101,25 +140,36 @@ export class Dialog{
             this.WIDTH, this.HEIGHT
         );
 
-        // draw wood
-        let headCord = [this.prev0Cord.x, this.prev0Cord.y];
-        
-        const isExistinArr = (arr1, arr2) => {
-            if (arr1[0] !== arr2[0]) {
-                return false;
-            };
-            if (arr1[1] !== arr2[1]) {
-                return false;
-            };
-            return true;
+        // draw ground
+        let groundCords = [
+            [0,12],[1,12],[2,12],[3,12],[4,12],[5,12],[6,12],[7,12],[8,12],[9,12],
+            [10,12],[11,12],[12,12],[13,12],[14,12],[15,12],[16,12],[17,12],[18,12],[19,12],
+            [20,12],[21,12],[22,12],[23,12],[24,12],[25,12],[26,12],[27,12],[28,12],[29,12],
+            [0,13],[1,13],[2,13],[3,13],[4,13],[5,13],[6,13],[7,13],[8,13],[9,13],
+            [10,13],[11,13],[12,13],[13,13],[14,13],[15,13],[16,13],[17,13],[18,13],[19,13],
+            [20,13],[21,13],[22,13],[23,13],[24,13],[25,13],[26,13],[27,13],[28,13],[29,13],
+            [0,14],[1,14],[2,14],[3,14],[4,14],[5,14],[6,14],[7,14],[8,14],[9,14],
+            [10,14],[11,14],[12,14],[13,14],[14,14],[15,14],[16,14],[17,14],[18,14],[19,14],
+            [20,14],[21,14],[22,14],[23,14],[24,14],[25,14],[26,14],[27,14],[28,14],[29,14],
+        ];
+        ctx.fillStyle = `#b196ff`;
+        for(let i = 0; i < groundCords.length; i++){
+            ctx.fillRect(
+                this.posAsCord(groundCords[i][0], "x"),
+                this.posAsCord(groundCords[i][1], "y"),
+                this.WIDTH, this.HEIGHT
+            );
         };
 
+        // draw wood
+        let headCord = [this.prev0Cord.x, this.prev0Cord.y];
+        // woodCords는 외부 파일에서 가져옴 / 문제에 따라 블록개수 다르게 생성
+        // 벌레먹은 파트는 3번째 인자값을 false로 변경하여 화면에 표출하지 않도록 함
         woodCords.some((woodCord, i) => {
-            if(isExistinArr(woodCord, headCord)){
+            if(this.isExistinArr(woodCord, headCord)){
                 woodCords[i][2] = false;
             };
         });
-        
         ctx.fillStyle = `#cdbddb`;
         for(let i = 0; i < woodCords.length; i++){
             if(woodCords[i][2]){
@@ -132,13 +182,6 @@ export class Dialog{
         };
 
         // draw quiz
-        let quizCords = [
-            [21,6],
-            [20,7],[21,7],
-            [21,8],
-            [21,9],
-            [21,10],
-            [20,11],[21,11],[22,11]];
         ctx.fillStyle = `#cdbddb`;
         for(let i = 0; i < quizCords.length; i++){
             ctx.fillRect(
@@ -146,7 +189,9 @@ export class Dialog{
                 this.posAsCord(quizCords[i][1], "y"),
                 this.WIDTH, this.HEIGHT
             );
-        }
+        };
+
+        this.compare(woodCords, quizLogic);
     }
 
     arrowKeyDown(key){

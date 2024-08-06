@@ -39,9 +39,6 @@ export default class App_01 extends Component{
         }
         this.canvas.width = this.stageWidth;
         this.canvas.height = this.stageHeight;
-
-        console.log(this.canvas.width)
-        console.log(this.canvas.height)
     
         // context 설정
         this.ctx.scale = (2,2);
