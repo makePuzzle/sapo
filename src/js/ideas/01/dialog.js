@@ -63,12 +63,29 @@ export class Dialog{
         this.compare = (woodCords, quizLogic) => {
             // 아직 벌레에게 먹히지 않은 나무 블록들의 좌표를 모은 배열 생성
             let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
-            let leadCord_surv_x = surviveWoods[0][0];
-            let leadCord_surv_y = surviveWoods[0][1];
+            if(surviveWoods.length > 0){
+                // surviveWoods의 첫번째 요소의 x, y 좌표값을 변수 선언
+                let leadCord_surv_x = surviveWoods[0][0];
+                let leadCord_surv_y = surviveWoods[0][1];
 
-            let answer = quizLogic.log.map(log => [leadCord_surv_x+log[0], leadCord_surv_y+log[1]]);
-            answer.unshift([leadCord_surv_x, leadCord_surv_y]);
-            console.log(answer)
+                // quizlog와 leadCord를 합쳐 현재 상황에서 가질수 있는 답지 생성
+                let answer = quizLogic.log.map(log => [leadCord_surv_x+log[0], leadCord_surv_y+log[1]]);
+                answer.unshift([leadCord_surv_x, leadCord_surv_y]);
+                if(surviveWoods.length !== answer.length){
+                    return false;
+                }else{
+                    let i = 0;
+                    for(; i < answer.length; i++){
+                        if(
+                            surviveWoods[i][0] !== answer[i][0] ||
+                            surviveWoods[i][1] !== answer[i][1]
+                        ){
+                            break;
+                        }
+                    };
+                    return i === answer.length ? true : false;
+                };
+            }
         }
     }
 
@@ -191,7 +208,7 @@ export class Dialog{
             );
         };
 
-        this.compare(woodCords, quizLogic);
+        console.log(this.compare(woodCords, quizLogic));
     }
 
     arrowKeyDown(key){
