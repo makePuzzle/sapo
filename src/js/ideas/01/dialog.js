@@ -23,6 +23,18 @@ for(let q = 0; q < quizLogic.log.length; q++){
     ])
 };
 
+const groundCords = [
+    [0,12],[1,12],[2,12],[3,12],[4,12],[5,12],[6,12],[7,12],[8,12],[9,12],
+    [10,12],[11,12],[12,12],[13,12],[14,12],[15,12],[16,12],[17,12],[18,12],[19,12],
+    [20,12],[21,12],[22,12],[23,12],[24,12],[25,12],[26,12],[27,12],[28,12],[29,12],
+    [0,13],[1,13],[2,13],[3,13],[4,13],[5,13],[6,13],[7,13],[8,13],[9,13],
+    [10,13],[11,13],[12,13],[13,13],[14,13],[15,13],[16,13],[17,13],[18,13],[19,13],
+    [20,13],[21,13],[22,13],[23,13],[24,13],[25,13],[26,13],[27,13],[28,13],[29,13],
+    [0,14],[1,14],[2,14],[3,14],[4,14],[5,14],[6,14],[7,14],[8,14],[9,14],
+    [10,14],[11,14],[12,14],[13,14],[14,14],[15,14],[16,14],[17,14],[18,14],[19,14],
+    [20,14],[21,14],[22,14],[23,14],[24,14],[25,14],[26,14],[27,14],[28,14],[29,14],
+];
+
 export class Dialog{
     constructor(){
         this.startCord = new Worm();
@@ -43,7 +55,7 @@ export class Dialog{
                 return this.stageHeight * cord / 15;
             }
         };
-        
+
         this.isExistinArr = (arr1, arr2) => {
             if (arr1[0] !== arr2[0]) {
                 return false;
@@ -82,14 +94,57 @@ export class Dialog{
             };
         };
 
-        this.fall = (woodCords, wormCords) => {
+        this.isFall = (wormCords, woodCords) => {
+            // wormCords가 surviveWoods 또는 groundCords에 걸릴때까지 낙하
             let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
-            let yCords = wormCords.map(wormCord => wormCord.y);
-            const max = Math.max(...yCords);
-            const res = [];
-            yCords.forEach((item, index) => item === max ? res.push(index): null);
 
-            return res;
+            // 각각의 worm 블록에 대해 실행
+            let n = 0;
+            for(let w = 0; w < wormCords.length; w++){
+                // 4. 추출된 y 좌표값중 가장 작은값을 선언
+                // ( 해당 worm 블록과 같은 x 선상, 보다 아래 있지만 그중 가장 위에 있는 블록의 y 좌표값)
+                let closestFloor = Math.min(...surviveWoods
+                    // 1. 해당 worm 블록과 x 좌표가 일치하는 surviveWoods 필터링
+                    .filter(surviveWood => 
+                        surviveWood[0] === wormCords[w].x &&
+                        surviveWood[2] === true
+                    )
+                    // 2. 그 중 worm 블록보다 아래에 있는 wood 필터링
+                    .filter(
+                        wood => wood[1] > wormCords[w].y
+                    )
+                    // 3. 그 wood들의 y 좌표값만 추출
+                    .map(
+                        wood => wood[1]
+                    )
+                );
+                if(
+                    // worm 블록과 x선상 겹치는 wood 블록이 없고 
+                    // 바닥에서 떨어져 있는 경우
+                    closestFloor === Infinity && 
+                    wormCords[w].y !== 11
+                ){
+                    n = n;
+                }else if(
+                    // worm 블록이 바닥에 있는 경우
+                    wormCords[w].y === 11
+                ){
+                    n++;
+                }else if(
+                    // worm 블록 바로 아래에 wood 블록이 있는 경우
+                    closestFloor - wormCords[w].y === 1
+                ){
+                    n++;
+                }else{
+                    // worm 블록과 x선상 겹치는 wood 블록이 있지만
+                    // worm 블록 바로 아래에 바닥도 wood 블록도 없는 경우
+                    n = n;
+                };
+            };
+
+            // 하나의 worm 블록이라도 어딘가에 걸쳐있다면 n 값이 증가
+            // n 값이 0 그대로라면 한칸 낙하
+            return n === 0 ? true : false;
         };
     }
 
@@ -162,17 +217,6 @@ export class Dialog{
         );
 
         // draw ground
-        let groundCords = [
-            [0,12],[1,12],[2,12],[3,12],[4,12],[5,12],[6,12],[7,12],[8,12],[9,12],
-            [10,12],[11,12],[12,12],[13,12],[14,12],[15,12],[16,12],[17,12],[18,12],[19,12],
-            [20,12],[21,12],[22,12],[23,12],[24,12],[25,12],[26,12],[27,12],[28,12],[29,12],
-            [0,13],[1,13],[2,13],[3,13],[4,13],[5,13],[6,13],[7,13],[8,13],[9,13],
-            [10,13],[11,13],[12,13],[13,13],[14,13],[15,13],[16,13],[17,13],[18,13],[19,13],
-            [20,13],[21,13],[22,13],[23,13],[24,13],[25,13],[26,13],[27,13],[28,13],[29,13],
-            [0,14],[1,14],[2,14],[3,14],[4,14],[5,14],[6,14],[7,14],[8,14],[9,14],
-            [10,14],[11,14],[12,14],[13,14],[14,14],[15,14],[16,14],[17,14],[18,14],[19,14],
-            [20,14],[21,14],[22,14],[23,14],[24,14],[25,14],[26,14],[27,14],[28,14],[29,14],
-        ];
         ctx.fillStyle = `#b196ff`;
         for(let i = 0; i < groundCords.length; i++){
             ctx.fillRect(
@@ -229,7 +273,7 @@ export class Dialog{
         ){
             if( 
                 key === 'ArrowUp' &&
-                this.prev0Cord.y >= 6 &&
+                this.prev0Cord.y >= 2 &&
                 this.prev0Cord.y - 1 !== this.prev1Cord.y
             ){
                 this.target = this.prev0Cord.clone().moveUp();
@@ -254,14 +298,24 @@ export class Dialog{
             }else{
                 console.log('ELSE')
                 return null;
-            }
+            };
             this.prev3Cord = this.prev2Cord.clone();
             this.prev2Cord = this.prev1Cord.clone();
             this.prev1Cord = this.prev0Cord.clone();
             this.prev0Cord = this.target.clone();
 
-            console.log(this.fall(woodCords, [this.prev0Cord, this.prev1Cord, this.prev2Cord, this.prev3Cord]));
-            return this;
+            if(this.isFall([this.prev0Cord, this.prev1Cord, this.prev2Cord, this.prev3Cord], woodCords)){
+                // 낙하 상황 시 뻗고 .2초 뒤에 낙하
+                    this.prev0Cord = this.prev0Cord.clone().moveDown();
+                    this.prev1Cord = this.prev1Cord.clone().moveDown();
+                    this.prev2Cord = this.prev2Cord.clone().moveDown();
+                    this.prev3Cord = this.prev3Cord.clone().moveDown();
+                    
+                    return this;
+            }else{
+                // 지지 상황 시 그냥 실행
+                return this;
+            };
         }
     }
 }
