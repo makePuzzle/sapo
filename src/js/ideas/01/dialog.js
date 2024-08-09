@@ -1,5 +1,7 @@
 import { Worm } from './worm.js';
 
+import quizLogic from "./quizzes/01.json";
+
 const FPS = 1000 / 60;
 const FOLLOW_SPEED = 0.8;
 
@@ -11,24 +13,15 @@ const woodCords = [
     [8,10,true],[9,10,true],[10,10,true],[11,10,true],[12,10,true],
     [8,11,true],[9,11,true],[10,11,true],[11,11,true],[12,11,true]
 ];
-const quizLogic = {
-    leadCord: [21,6],
-    log:[
-        [-1,+1],[+0,+1],
-        [+0,+2],
-        [+0,+3],
-        [+0,+4],
-        [-1,+5],[+0,+5],[+1,+5]
-    ]
-}
-const quizCords = [
-    [21,6],
-    [20,7],[21,7],
-    [21,8],
-    [21,9],
-    [21,10],
-    [20,11],[21,11],[22,11]
-];
+
+const quizCords = new Array;
+quizCords.push(quizLogic.leadCord)
+for(let q = 0; q < quizLogic.log.length; q++){
+    quizCords.push([
+        quizLogic.leadCord[0] + quizLogic.log[q][0],
+        quizLogic.leadCord[1] + quizLogic.log[q][1]
+    ])
+};
 
 export class Dialog{
     constructor(){
@@ -42,6 +35,7 @@ export class Dialog{
         this.prev2Cord = new Worm();
         this.prev3Cord = new Worm();
         this.target = new Worm();
+
         this.posAsCord = (cord, XorY) => {
             if(XorY === "x"){
                 return this.stageWidth * cord / 30;
@@ -85,8 +79,18 @@ export class Dialog{
                     };
                     return i === answer.length ? true : false;
                 };
-            }
-        }
+            };
+        };
+
+        this.fall = (woodCords, wormCords) => {
+            let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
+            let yCords = wormCords.map(wormCord => wormCord.y);
+            const max = Math.max(...yCords);
+            const res = [];
+            yCords.forEach((item, index) => item === max ? res.push(index): null);
+
+            return res;
+        };
     }
 
     resize(stageWidth, stageHeight){
@@ -208,6 +212,8 @@ export class Dialog{
             );
         };
 
+        // 정답과 같은지 확인하는 코드.
+        // 정답과 일치하면 축하 창과 다음 문제로 넘어가는 코드 작성해야됨.
         console.log(this.compare(woodCords, quizLogic));
     }
 
@@ -215,57 +221,47 @@ export class Dialog{
         // 조건 1. 입력키가 방향키일것
         // 조건 2. (3,5)~(17,11)을 벗어나지 말것
         // 조건 3. 이동하고자 하는 좌표가 prve1Cord의 좌표와 겹치지 말것
-        if( 
-            key === 'ArrowUp' &&
-            this.prev0Cord.y >= 6 &&
-            this.prev0Cord.y - 1 !== this.prev1Cord.y
+        if(
+            key === 'ArrowUp' ||
+            key === 'ArrowDown' ||
+            key === 'ArrowLeft' ||
+            key === 'ArrowRight'
         ){
-            this.target = this.prev0Cord.clone().moveUp();
-
+            if( 
+                key === 'ArrowUp' &&
+                this.prev0Cord.y >= 6 &&
+                this.prev0Cord.y - 1 !== this.prev1Cord.y
+            ){
+                this.target = this.prev0Cord.clone().moveUp();
+            }else if( 
+                key === 'ArrowDown' &&
+                this.prev0Cord.y <= 10 &&
+                this.prev0Cord.y + 1 !== this.prev1Cord.y
+            ){
+                this.target = this.prev0Cord.clone().moveDown();
+            } else if( 
+                key === 'ArrowLeft' &&
+                this.prev0Cord.x >= 4 &&
+                this.prev0Cord.x - 1 !== this.prev1Cord.x
+            ){
+                this.target = this.prev0Cord.clone().moveLeft();
+            } else if( 
+                key === 'ArrowRight' &&
+                this.prev0Cord.x <= 16 &&
+                this.prev0Cord.x + 1 !== this.prev1Cord.x
+            ){
+                this.target = this.prev0Cord.clone().moveRight();
+            }else{
+                console.log('ELSE')
+                return null;
+            }
             this.prev3Cord = this.prev2Cord.clone();
             this.prev2Cord = this.prev1Cord.clone();
             this.prev1Cord = this.prev0Cord.clone();
             this.prev0Cord = this.target.clone();
-            return this;
-        }else if( 
-            key === 'ArrowDown' &&
-            this.prev0Cord.y <= 10 &&
-            this.prev0Cord.y + 1 !== this.prev1Cord.y
-        ){
-            this.target = this.prev0Cord.clone().moveDown();
 
-            this.prev3Cord = this.prev2Cord.clone();
-            this.prev2Cord = this.prev1Cord.clone();
-            this.prev1Cord = this.prev0Cord.clone();
-            this.prev0Cord = this.target.clone();
+            console.log(this.fall(woodCords, [this.prev0Cord, this.prev1Cord, this.prev2Cord, this.prev3Cord]));
             return this;
-        } else if( 
-            key === 'ArrowLeft' &&
-            this.prev0Cord.x >= 4 &&
-            this.prev0Cord.x - 1 !== this.prev1Cord.x
-        ){
-            this.target = this.prev0Cord.clone().moveLeft();
-
-            this.prev3Cord = this.prev2Cord.clone();
-            this.prev2Cord = this.prev1Cord.clone();
-            this.prev1Cord = this.prev0Cord.clone();
-            this.prev0Cord = this.target.clone();
-            return this;
-        } else if( 
-            key === 'ArrowRight' &&
-            this.prev0Cord.x <= 16 &&
-            this.prev0Cord.x + 1 !== this.prev1Cord.x
-        ){
-            this.target = this.prev0Cord.clone().moveRight();
-
-            this.prev3Cord = this.prev2Cord.clone();
-            this.prev2Cord = this.prev1Cord.clone();
-            this.prev1Cord = this.prev0Cord.clone();
-            this.prev0Cord = this.target.clone();
-            return this;
-        }else{
-            console.log('ELSE')
-            return null;
         }
     }
 }
