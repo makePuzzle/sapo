@@ -57,10 +57,10 @@ export class Dialog{
         };
 
         this.isExistinArr = (arr1, arr2) => {
-            if (arr1[0] !== arr2[0]) {
+            if(arr1[0] !== arr2[0]){
                 return false;
             };
-            if (arr1[1] !== arr2[1]) {
+            if(arr1[1] !== arr2[1]){
                 return false;
             };
             return true;
@@ -96,7 +96,7 @@ export class Dialog{
 
         this.isFall = (wormCords, woodCords) => {
             // wormCords가 surviveWoods 또는 groundCords에 걸릴때까지 낙하
-            let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
+            let surviveWoods = woodCords.filter(woodCord => woodCord[2] == "true");
 
             // 각각의 worm 블록에 대해 실행
             let n = 0;
@@ -107,15 +107,15 @@ export class Dialog{
                     // 1. 해당 worm 블록과 x 좌표가 일치하는 surviveWoods 필터링
                     .filter(surviveWood => 
                         surviveWood[0] === wormCords[w].x &&
-                        surviveWood[2] === true
+                        surviveWood[2]
                     )
                     // 2. 그 중 worm 블록보다 아래에 있는 wood 필터링
-                    .filter(
-                        wood => wood[1] > wormCords[w].y
+                    .filter(wood => 
+                        wood[1] > wormCords[w].y
                     )
                     // 3. 그 wood들의 y 좌표값만 추출
-                    .map(
-                        wood => wood[1]
+                    .map(wood => 
+                        wood[1]
                     )
                 );
                 if(
@@ -286,44 +286,67 @@ export class Dialog{
             key === 'ArrowLeft' ||
             key === 'ArrowRight'
         ){
+            let wormCordArr = new Array;
+
             if(
                 key === 'ArrowUp' &&
                 this.prev0Cord.y >= 2 &&
                 this.prev0Cord.y - 1 !== this.prev1Cord.y
             ){
                 this.target = this.prev0Cord.clone().moveUp(1);
+                wormCordArr.push([
+                    this.target.clone(),
+                    this.prev0Cord.clone(),
+                    this.prev1Cord.clone(),
+                    this.prev2Cord.clone()
+                ]);
             }else if(
                 key === 'ArrowDown' &&
                 this.prev0Cord.y <= 10 &&
                 this.prev0Cord.y + 1 !== this.prev1Cord.y
             ){
                 this.target = this.prev0Cord.clone().moveDown(1);
+                wormCordArr.push([
+                    this.target.clone(),
+                    this.prev0Cord.clone(),
+                    this.prev1Cord.clone(),
+                    this.prev2Cord.clone()
+                ]);
             }else if(
                 key === 'ArrowLeft' &&
                 this.prev0Cord.x >= 4 &&
                 this.prev0Cord.x - 1 !== this.prev1Cord.x
             ){
                 this.target = this.prev0Cord.clone().moveLeft(1);
+                wormCordArr.push([
+                    this.target.clone(),
+                    this.prev0Cord.clone(),
+                    this.prev1Cord.clone(),
+                    this.prev2Cord.clone()
+                ]);
             }else if(
                 key === 'ArrowRight' &&
                 this.prev0Cord.x <= 16 &&
                 this.prev0Cord.x + 1 !== this.prev1Cord.x
             ){
                 this.target = this.prev0Cord.clone().moveRight(1);
+                wormCordArr.push([
+                    this.target.clone(),
+                    this.prev0Cord.clone(),
+                    this.prev1Cord.clone(),
+                    this.prev2Cord.clone()
+                ]);
             }else{
-                console.log('ELSE')
-                return null;
+                this.target = this.prev0Cord.clone();
+                wormCordArr.push([
+                    this.target.clone(),
+                    this.prev1Cord.clone(),
+                    this.prev2Cord.clone(),
+                    this.prev3Cord.clone()
+                ]);
             };
 
-            let wormCordArr = new Array;
-
-            wormCordArr.push([
-                this.target.clone(),
-                this.prev0Cord.clone(),
-                this.prev1Cord.clone(),
-                this.prev2Cord.clone()
-            ]);
-
+            // 애벌레 활동 가능 최대 높이가 10 이므로 최대 10번 반복
             for(let h = 0; h < 10; h++){
                 if(
                     this.isFall(

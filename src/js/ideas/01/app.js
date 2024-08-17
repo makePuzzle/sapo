@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { Worm } from "./worm.js";
 import { Dialog } from "./dialog.js";
 
 export default class App_01 extends Component{
@@ -13,7 +12,7 @@ export default class App_01 extends Component{
         this.ctx = this.canvas.getContext("2d");
         
         this.pressKey = null;
-        this.wormCord = new Worm();
+        this.keying = false;
 
         // Dialog들이 들어있는 items 배열 구성
         this.dialog = new Dialog();
@@ -57,20 +56,25 @@ export default class App_01 extends Component{
     }
 
     arrowPress(e){
-        this.pressKey = e.key;
+        if(!this.keying){
+            this.keying = true;
+            this.pressKey = e.key;
 
-        // 눌린 버튼이 방향키라면 this.startCord, this.prevCord, this.target 반환
-        // 눌린 버튼이 방향키가 아니면 null 반환
-        const wormCordArr = this.dialog.arrowKeyDown(this.pressKey);
-        console.log(wormCordArr)
-        if(wormCordArr){
-            if(wormCordArr.length === 1){
-                this.dialog.setPosAsCords(wormCordArr[0]);
-            }else if(wormCordArr.length > 1){
-                this.dialog.setPosAsCords(wormCordArr[0]);
-                setTimeout(() => {
-                    this.dialog.setPosAsCords(wormCordArr[wormCordArr.length-1]);
-                }, 300);
+            // 눌린 버튼이 방향키라면 this.startCord, this.prevCord, this.target 반환
+            // 눌린 버튼이 방향키가 아니면 null 반환
+            const wormCordArr = this.dialog.arrowKeyDown(this.pressKey);
+
+            if(wormCordArr){
+                if(wormCordArr.length === 1){
+                    this.dialog.setPosAsCords(wormCordArr[0]);
+                    this.keying = false;
+                }else if(wormCordArr.length > 1){
+                    this.dialog.setPosAsCords(wormCordArr[0]);
+                    setTimeout(() => {
+                        this.dialog.setPosAsCords(wormCordArr[wormCordArr.length-1]);
+                        this.keying = false;
+                    }, 200);
+                }
             }
         }
     }
