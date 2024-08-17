@@ -43,8 +43,8 @@ export default class App_01 extends Component{
         // context 설정
         this.ctx.scale = (2,2);
 
-        // Dialog > resize
-        this.dialog.resize(this.stageWidth, this.stageHeight);
+        const startwormCord = this.dialog.setBase(this.stageWidth, this.stageHeight);
+        this.dialog.setPosAsCords(startwormCord);
     }
 
     animate(){
@@ -61,10 +61,17 @@ export default class App_01 extends Component{
 
         // 눌린 버튼이 방향키라면 this.startCord, this.prevCord, this.target 반환
         // 눌린 버튼이 방향키가 아니면 null 반환
-        const dl = this.dialog.arrowKeyDown(this.pressKey);
-        if(dl){
-            // Dialog > resize
-            this.dialog.resize(this.stageWidth, this.stageHeight);
+        const wormCordArr = this.dialog.arrowKeyDown(this.pressKey);
+        console.log(wormCordArr)
+        if(wormCordArr){
+            if(wormCordArr.length === 1){
+                this.dialog.setPosAsCords(wormCordArr[0]);
+            }else if(wormCordArr.length > 1){
+                this.dialog.setPosAsCords(wormCordArr[0]);
+                setTimeout(() => {
+                    this.dialog.setPosAsCords(wormCordArr[wormCordArr.length-1]);
+                }, 300);
+            }
         }
     }
 

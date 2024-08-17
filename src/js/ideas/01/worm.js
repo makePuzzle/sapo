@@ -4,23 +4,23 @@ export class Worm {
         this.y = y || 0;
     }
 
-    moveRight(){
-        this.x += 1;
+    moveRight(n){
+        this.x += n;
         return this;
     }
 
-    moveLeft(){
-        this.x -= 1;
+    moveLeft(n){
+        this.x -= n;
         return this;
     }
 
-    moveDown(){
-        this.y += 1;
+    moveDown(n){
+        this.y += n;
         return this;
     }
 
-    moveUp(){
-        this.y -= 1;
+    moveUp(n){
+        this.y -= n;
         return this;
     }
 

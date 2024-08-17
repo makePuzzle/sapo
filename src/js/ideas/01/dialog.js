@@ -148,10 +148,14 @@ export class Dialog{
         };
     }
 
-    resize(stageWidth, stageHeight){
+    setBase(stageWidth, stageHeight){
         // stageWidth, stageHeight 기억
         this.stageWidth = stageWidth;
         this.stageHeight = stageHeight;
+
+        // worm 의 부품 블록의 너비, 높이
+        this.WIDTH = stageWidth / 30 * 9/10;
+        this.HEIGHT = this.WIDTH;
 
         // worm 이동 가능 좌표값 (3,6) ~ (17,11)
         // worm 시작 위치 좌표값 (3,11)(4,11)(5,11),(6,11)
@@ -171,20 +175,31 @@ export class Dialog{
             this.prev3Cord.y = this.startCord.y;
         };
 
-        // 좌표에 따른 포지션 설정
-        // pos0 머리, pos1 가슴, pos2 배, pos3 꼬리
-        this.pos0.x = this.posAsCord(this.prev0Cord.x, "x");
-        this.pos0.y = this.posAsCord(this.prev0Cord.y, "y");
-        this.pos1.x = this.posAsCord(this.prev1Cord.x, "x");
-        this.pos1.y = this.posAsCord(this.prev1Cord.y, "y");
-        this.pos2.x = this.posAsCord(this.prev2Cord.x, "x");
-        this.pos2.y = this.posAsCord(this.prev2Cord.y, "y");
-        this.pos3.x = this.posAsCord(this.prev3Cord.x, "x");
-        this.pos3.y = this.posAsCord(this.prev3Cord.y, "y");
+        let startwormCord = [
+            this.prev0Cord,
+            this.prev1Cord,
+            this.prev2Cord,
+            this.prev3Cord
+        ];
+        return startwormCord;
+    }
 
-        // worm 의 부품 블록의 너비, 높이
-        this.WIDTH = stageWidth / 30 * 9/10;
-        this.HEIGHT = this.WIDTH;
+    setPosAsCords(wormCordEl){
+        // 좌표에 따른 포지션 설정 
+        // pos0 머리, pos1 가슴, pos2 배, pos3 꼬리
+        this.pos0.x = this.posAsCord(wormCordEl[0].x, "x");
+        this.pos0.y = this.posAsCord(wormCordEl[0].y, "y");
+        this.pos1.x = this.posAsCord(wormCordEl[1].x, "x");
+        this.pos1.y = this.posAsCord(wormCordEl[1].y, "y");
+        this.pos2.x = this.posAsCord(wormCordEl[2].x, "x");
+        this.pos2.y = this.posAsCord(wormCordEl[2].y, "y");
+        this.pos3.x = this.posAsCord(wormCordEl[3].x, "x");
+        this.pos3.y = this.posAsCord(wormCordEl[3].y, "y");
+        
+        this.prev0Cord = wormCordEl[0];
+        this.prev1Cord = wormCordEl[1];
+        this.prev2Cord = wormCordEl[2];
+        this.prev3Cord = wormCordEl[3];
     }
 
     animate(ctx){
@@ -271,51 +286,69 @@ export class Dialog{
             key === 'ArrowLeft' ||
             key === 'ArrowRight'
         ){
-            if( 
+            if(
                 key === 'ArrowUp' &&
                 this.prev0Cord.y >= 2 &&
                 this.prev0Cord.y - 1 !== this.prev1Cord.y
             ){
-                this.target = this.prev0Cord.clone().moveUp();
-            }else if( 
+                this.target = this.prev0Cord.clone().moveUp(1);
+            }else if(
                 key === 'ArrowDown' &&
                 this.prev0Cord.y <= 10 &&
                 this.prev0Cord.y + 1 !== this.prev1Cord.y
             ){
-                this.target = this.prev0Cord.clone().moveDown();
-            } else if( 
+                this.target = this.prev0Cord.clone().moveDown(1);
+            }else if(
                 key === 'ArrowLeft' &&
                 this.prev0Cord.x >= 4 &&
                 this.prev0Cord.x - 1 !== this.prev1Cord.x
             ){
-                this.target = this.prev0Cord.clone().moveLeft();
-            } else if( 
+                this.target = this.prev0Cord.clone().moveLeft(1);
+            }else if(
                 key === 'ArrowRight' &&
                 this.prev0Cord.x <= 16 &&
                 this.prev0Cord.x + 1 !== this.prev1Cord.x
             ){
-                this.target = this.prev0Cord.clone().moveRight();
+                this.target = this.prev0Cord.clone().moveRight(1);
             }else{
                 console.log('ELSE')
                 return null;
             };
-            this.prev3Cord = this.prev2Cord.clone();
-            this.prev2Cord = this.prev1Cord.clone();
-            this.prev1Cord = this.prev0Cord.clone();
-            this.prev0Cord = this.target.clone();
 
-            if(this.isFall([this.prev0Cord, this.prev1Cord, this.prev2Cord, this.prev3Cord], woodCords)){
-                // 낙하 상황 시 뻗고 .2초 뒤에 낙하
-                    this.prev0Cord = this.prev0Cord.clone().moveDown();
-                    this.prev1Cord = this.prev1Cord.clone().moveDown();
-                    this.prev2Cord = this.prev2Cord.clone().moveDown();
-                    this.prev3Cord = this.prev3Cord.clone().moveDown();
-                    
-                    return this;
-            }else{
-                // 지지 상황 시 그냥 실행
-                return this;
+            let wormCordArr = new Array;
+
+            wormCordArr.push([
+                this.target.clone(),
+                this.prev0Cord.clone(),
+                this.prev1Cord.clone(),
+                this.prev2Cord.clone()
+            ]);
+
+            for(let h = 0; h < 10; h++){
+                if(
+                    this.isFall(
+                        [this.target, this.prev0Cord, this.prev1Cord, this.prev2Cord], 
+                        woodCords
+                    )
+                ){
+                    // 낙하 상황 시 한단계 떨어진 좌표를 배열에 저장
+                    wormCordArr.push([
+                        this.target.clone().moveDown(1),
+                        this.prev0Cord.clone().moveDown(1),
+                        this.prev1Cord.clone().moveDown(1),
+                        this.prev2Cord.clone().moveDown(1)
+                    ]);
+
+                    this.target = this.target.clone().moveDown(1);
+                    this.prev0Cord = this.prev0Cord.clone().moveDown(1);
+                    this.prev1Cord = this.prev1Cord.clone().moveDown(1);
+                    this.prev2Cord = this.prev2Cord.clone().moveDown(1);
+                }else{
+                    // 지지 상황 시 반복문 중지
+                    break;
+                };
             };
+            return wormCordArr;
         }
     }
 }
