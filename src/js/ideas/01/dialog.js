@@ -6,12 +6,12 @@ const FPS = 1000 / 60;
 const FOLLOW_SPEED = 0.8;
 
 const woodCords = [
-    [8,6,true],[9,6,true],[10,6,true],[11,6,true],[12,6,true],
-    [8,7,true],[9,7,true],[10,7,true],[11,7,true],[12,7,true],
-    [8,8,true],[9,8,true],[10,8,true],[11,8,true],[12,8,true],
-    [8,9,true],[9,9,true],[10,9,true],[11,9,true],[12,9,true],
-    [8,10,true],[9,10,true],[10,10,true],[11,10,true],[12,10,true],
-    [8,11,true],[9,11,true],[10,11,true],[11,11,true],[12,11,true]
+    [8,6,true,0],[9,6,true,0],[10,6,true,0],[11,6,true,0],[12,6,true,0],
+    [8,7,true,0],[9,7,true,0],[10,7,true,0],[11,7,true,0],[12,7,true,0],
+    [8,8,true,0],[9,8,true,0],[10,8,true,0],[11,8,true,0],[12,8,true,0],
+    [8,9,true,0],[9,9,true,0],[10,9,true,0],[11,9,true,0],[12,9,true,0],
+    [8,10,true,0],[9,10,true,0],[10,10,true,0],[11,10,true,0],[12,10,true,0],
+    [8,11,true,0],[9,11,true,0],[10,11,true,0],[11,11,true,0],[12,11,true,0]
 ];
 
 const quizCords = new Array;
@@ -94,7 +94,7 @@ export class Dialog{
             };
         };
 
-        this.isFall = (wormCords, woodCords) => {
+        this.isWormFall = (wormCords, woodCords) => {
             // wormCords가 surviveWoods 또는 groundCords에 걸릴때까지 낙하
             let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
             
@@ -151,6 +151,18 @@ export class Dialog{
             // 하나의 worm 블록이라도 어딘가에 걸쳐있다면 n 값이 증가
             // n 값이 0 그대로라면 한칸 낙하
             return n === 0 ? true : false;
+        };
+
+        this.divMass = (woodCords) => {
+            // 아직 벌레에게 먹히지 않은 나무 블록들의 좌표를 모은 배열 생성
+            let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
+            // 살아남은 나무블록들 중 최상단 최좌측의 블록을 leadMass로 지정하고
+            // leadMass의 소속을 1번으로 설정
+            let leadMass = surviveWoods[0];
+            leadMass[3] = 1;
+            // leadMass와 우측 또는 하단으로 붙어있는 블록을 찾고
+            // 또 그 블록과 우측 또는 하단으로 붙어있는 블록을 찾기를 반복
+            // 그 과정에서 찾아진 블록들의 소속을 leadMass와 같은 소속으로 설정
         };
     }
 
@@ -293,71 +305,52 @@ export class Dialog{
                 this.prev0Cord.y - 1 !== this.prev1Cord.y
             ){
                 this.target = this.prev0Cord.clone().moveUp();
-                wormCordArr.push([
-                    this.target.clone(),
-                    this.prev0Cord.clone(),
-                    this.prev1Cord.clone(),
-                    this.prev2Cord.clone()
-                ]);
             }else if(
                 key === 'ArrowDown' &&
                 this.prev0Cord.y <= 10 &&
                 this.prev0Cord.y + 1 !== this.prev1Cord.y
             ){
                 this.target = this.prev0Cord.clone().moveDown();
-                wormCordArr.push([
-                    this.target.clone(),
-                    this.prev0Cord.clone(),
-                    this.prev1Cord.clone(),
-                    this.prev2Cord.clone()
-                ]);
             }else if(
                 key === 'ArrowLeft' &&
                 this.prev0Cord.x >= 4 &&
                 this.prev0Cord.x - 1 !== this.prev1Cord.x
             ){
                 this.target = this.prev0Cord.clone().moveLeft();
-                wormCordArr.push([
-                    this.target.clone(),
-                    this.prev0Cord.clone(),
-                    this.prev1Cord.clone(),
-                    this.prev2Cord.clone()
-                ]);
             }else if(
                 key === 'ArrowRight' &&
                 this.prev0Cord.x <= 16 &&
                 this.prev0Cord.x + 1 !== this.prev1Cord.x
             ){
                 this.target = this.prev0Cord.clone().moveRight();
-                wormCordArr.push([
-                    this.target.clone(),
-                    this.prev0Cord.clone(),
-                    this.prev1Cord.clone(),
-                    this.prev2Cord.clone()
-                ]);
             }else{
                 this.target = this.prev0Cord.clone();
-                wormCordArr.push([
-                    this.target.clone(),
-                    this.prev1Cord.clone(),
-                    this.prev2Cord.clone(),
-                    this.prev3Cord.clone()
-                ]);
+                this.prev0Cord = this.prev1Cord.clone();
+                this.prev1Cord = this.prev2Cord.clone();
+                this.prev2Cord = this.prev3Cord.clone();
             };
+
+            wormCordArr.push([
+                this.target.clone(),
+                this.prev0Cord.clone(),
+                this.prev1Cord.clone(),
+                this.prev2Cord.clone()
+            ]);
 
             // 벌레먹은 파트는 3번째 인자값을 false로 변경하여 화면에 표출하지 않도록 함
             let headCord = [this.target.x, this.target.y];
-            console.log(headCord)
             woodCords.some((woodCord, i) => {
                 if(this.isExistinArr(woodCord, headCord)){
                     woodCords[i][2] = false;
                 };
             });
             
+            console.log(wormCordArr[0])
+            console.log([this.target, this.prev0Cord, this.prev1Cord, this.prev2Cord])
             // 애벌레 활동 가능 최대 높이가 10 이므로 최대 10번 반복
             for(let h = 0; h < 10; h++){
                 if(
-                    this.isFall(
+                    this.isWormFall(
                         [this.target, this.prev0Cord, this.prev1Cord, this.prev2Cord], 
                         woodCords
                     )
@@ -370,6 +363,8 @@ export class Dialog{
                         this.prev2Cord.clone().moveDown()
                     ]);
 
+                    // 낙하가 종료되었는지 판단하기 위해 변화값을 this에 저장하지만
+                    // 저장한 내용이 즉시 애니메이션에 반영되는것은 아니고 그 과정을 배열에 저장하고 반환함.
                     this.target = this.target.clone().moveDown();
                     this.prev0Cord = this.prev0Cord.clone().moveDown();
                     this.prev1Cord = this.prev1Cord.clone().moveDown();
