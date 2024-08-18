@@ -96,8 +96,8 @@ export class Dialog{
 
         this.isFall = (wormCords, woodCords) => {
             // wormCords가 surviveWoods 또는 groundCords에 걸릴때까지 낙하
-            let surviveWoods = woodCords.filter(woodCord => woodCord[2] == "true");
-
+            let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
+            
             // 각각의 worm 블록에 대해 실행
             let n = 0;
             for(let w = 0; w < wormCords.length; w++){
@@ -106,8 +106,7 @@ export class Dialog{
                 let closestFloor = Math.min(...surviveWoods
                     // 1. 해당 worm 블록과 x 좌표가 일치하는 surviveWoods 필터링
                     .filter(surviveWood => 
-                        surviveWood[0] === wormCords[w].x &&
-                        surviveWood[2]
+                        surviveWood[0] === wormCords[w].x
                     )
                     // 2. 그 중 worm 블록보다 아래에 있는 wood 필터링
                     .filter(wood => 
@@ -118,6 +117,13 @@ export class Dialog{
                         wood[1]
                     )
                 );
+                console.log(
+                    ...surviveWoods
+                    .filter(surviveWood => 
+                        surviveWood[0] === wormCords[w].x
+                    )
+                )
+                console.log(`${w}: ${closestFloor}`)
                 if(
                     // worm 블록과 x선상 겹치는 wood 블록이 없고 
                     // 바닥에서 떨어져 있는 경우
@@ -242,14 +248,7 @@ export class Dialog{
         };
 
         // draw wood
-        let headCord = [this.prev0Cord.x, this.prev0Cord.y];
         // woodCords는 외부 파일에서 가져옴 / 문제에 따라 블록개수 다르게 생성
-        // 벌레먹은 파트는 3번째 인자값을 false로 변경하여 화면에 표출하지 않도록 함
-        woodCords.some((woodCord, i) => {
-            if(this.isExistinArr(woodCord, headCord)){
-                woodCords[i][2] = false;
-            };
-        });
         ctx.fillStyle = `#cdbddb`;
         for(let i = 0; i < woodCords.length; i++){
             if(woodCords[i][2]){
@@ -293,7 +292,7 @@ export class Dialog{
                 this.prev0Cord.y >= 2 &&
                 this.prev0Cord.y - 1 !== this.prev1Cord.y
             ){
-                this.target = this.prev0Cord.clone().moveUp(1);
+                this.target = this.prev0Cord.clone().moveUp();
                 wormCordArr.push([
                     this.target.clone(),
                     this.prev0Cord.clone(),
@@ -305,7 +304,7 @@ export class Dialog{
                 this.prev0Cord.y <= 10 &&
                 this.prev0Cord.y + 1 !== this.prev1Cord.y
             ){
-                this.target = this.prev0Cord.clone().moveDown(1);
+                this.target = this.prev0Cord.clone().moveDown();
                 wormCordArr.push([
                     this.target.clone(),
                     this.prev0Cord.clone(),
@@ -317,7 +316,7 @@ export class Dialog{
                 this.prev0Cord.x >= 4 &&
                 this.prev0Cord.x - 1 !== this.prev1Cord.x
             ){
-                this.target = this.prev0Cord.clone().moveLeft(1);
+                this.target = this.prev0Cord.clone().moveLeft();
                 wormCordArr.push([
                     this.target.clone(),
                     this.prev0Cord.clone(),
@@ -329,7 +328,7 @@ export class Dialog{
                 this.prev0Cord.x <= 16 &&
                 this.prev0Cord.x + 1 !== this.prev1Cord.x
             ){
-                this.target = this.prev0Cord.clone().moveRight(1);
+                this.target = this.prev0Cord.clone().moveRight();
                 wormCordArr.push([
                     this.target.clone(),
                     this.prev0Cord.clone(),
@@ -346,6 +345,15 @@ export class Dialog{
                 ]);
             };
 
+            // 벌레먹은 파트는 3번째 인자값을 false로 변경하여 화면에 표출하지 않도록 함
+            let headCord = [this.target.x, this.target.y];
+            console.log(headCord)
+            woodCords.some((woodCord, i) => {
+                if(this.isExistinArr(woodCord, headCord)){
+                    woodCords[i][2] = false;
+                };
+            });
+            
             // 애벌레 활동 가능 최대 높이가 10 이므로 최대 10번 반복
             for(let h = 0; h < 10; h++){
                 if(
@@ -356,16 +364,16 @@ export class Dialog{
                 ){
                     // 낙하 상황 시 한단계 떨어진 좌표를 배열에 저장
                     wormCordArr.push([
-                        this.target.clone().moveDown(1),
-                        this.prev0Cord.clone().moveDown(1),
-                        this.prev1Cord.clone().moveDown(1),
-                        this.prev2Cord.clone().moveDown(1)
+                        this.target.clone().moveDown(),
+                        this.prev0Cord.clone().moveDown(),
+                        this.prev1Cord.clone().moveDown(),
+                        this.prev2Cord.clone().moveDown()
                     ]);
 
-                    this.target = this.target.clone().moveDown(1);
-                    this.prev0Cord = this.prev0Cord.clone().moveDown(1);
-                    this.prev1Cord = this.prev1Cord.clone().moveDown(1);
-                    this.prev2Cord = this.prev2Cord.clone().moveDown(1);
+                    this.target = this.target.clone().moveDown();
+                    this.prev0Cord = this.prev0Cord.clone().moveDown();
+                    this.prev1Cord = this.prev1Cord.clone().moveDown();
+                    this.prev2Cord = this.prev2Cord.clone().moveDown();
                 }else{
                     // 지지 상황 시 반복문 중지
                     break;
