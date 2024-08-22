@@ -56,7 +56,7 @@ export class Dialog{
             }
         };
 
-        this.isExistinArr = (arr1, arr2) => {
+        this.isSameCord = (arr1, arr2) => {
             if(arr1[0] !== arr2[0]){
                 return false;
             };
@@ -64,6 +64,18 @@ export class Dialog{
                 return false;
             };
             return true;
+        };
+
+        this.isIncludeInArr = (arr, target) => {
+            return arr.some(el => this.isSameCord(el, target));
+        };
+
+        this.hideEaten = (woodCords, headCord) => {
+            woodCords.some((woodCord, i) => {
+                if(this.isSameCord(woodCord, headCord)){
+                    woodCords[i][2] = false;
+                };
+            });
         };
 
         this.compare = (woodCords, quizLogic) => {
@@ -94,7 +106,7 @@ export class Dialog{
             };
         };
 
-        this.isWormFall = (wormCords, woodCords) => {
+        this.isWormFall = (woodCords, wormCords) => {
             // wormCords가 surviveWoods 또는 groundCords에 걸릴때까지 낙하
             let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
             
@@ -117,13 +129,7 @@ export class Dialog{
                         wood[1]
                     )
                 );
-                console.log(
-                    ...surviveWoods
-                    .filter(surviveWood => 
-                        surviveWood[0] === wormCords[w].x
-                    )
-                )
-                console.log(`${w}: ${closestFloor}`)
+                
                 if(
                     // worm 블록과 x선상 겹치는 wood 블록이 없고 
                     // 바닥에서 떨어져 있는 경우
@@ -154,15 +160,49 @@ export class Dialog{
         };
 
         this.divMass = (woodCords) => {
+            // 우선 나무 블록들의 소속을 전부 리셋
             // 아직 벌레에게 먹히지 않은 나무 블록들의 좌표를 모은 배열 생성
+            for(let w = 0; w < woodCords.length; w++) woodCords[w][3] = 0;
             let surviveWoods = woodCords.filter(woodCord => woodCord[2] === true);
-            // 살아남은 나무블록들 중 최상단 최좌측의 블록을 leadMass로 지정하고
-            // leadMass의 소속을 1번으로 설정
-            let leadMass = surviveWoods[0];
-            leadMass[3] = 1;
-            // leadMass와 우측 또는 하단으로 붙어있는 블록을 찾고
-            // 또 그 블록과 우측 또는 하단으로 붙어있는 블록을 찾기를 반복
-            // 그 과정에서 찾아진 블록들의 소속을 leadMass와 같은 소속으로 설정
+
+            let m = 0;
+            while(!surviveWoods.every(wood => wood[3] !== 0)){
+                // m 1 증가
+                m++;
+
+                // 살아남은 나무블록들 중 소속이 0인 블록들 중 
+                // 최상단 최좌측의 블록을 leadMass로 지정
+                let leadMass = surviveWoods.filter(wood => wood[3] === 0)[0];
+
+                let visited = []; // 탐색을 마친 노드들
+                let needVisit = []; // 탐색해야할 노드들
+
+                needVisit.push(leadMass);
+
+                // 탐색해야할 노드가 전부 사라지면 반복문 종료
+                while(needVisit.length !== 0){
+                    const node = needVisit.shift(); // 머문지 가장 오래된 노드를 뽑아냄
+                    if(!this.isIncludeInArr(visited, node)){ // 탐색한적 없는 노드라면
+                        visited.push(node); // 해당 노드를 탐색했다고 표기하고
+
+                        // 해당 노드와 붙어있는 노드를 찾아내고
+                        let woodLeft = surviveWoods.find(wood => this.isSameCord(wood, [node[0] - 1, node[1]]));
+                        let woodRight = surviveWoods.find(wood => this.isSameCord(wood, [node[0] + 1, node[1]]));
+                        let woodUnder = surviveWoods.find(wood => this.isSameCord(wood, [node[0], node[1] + 1]));
+
+                        // 있다면 배열에 저장후 needVisit에 저장
+                        let connected = new Array;
+                        if(woodLeft) connected.push(woodLeft);
+                        if(woodRight) connected.push(woodRight);
+                        if(woodUnder) connected.push(woodUnder);
+
+                        // 해당 노드와 연결 된 노드들을 탐색해야할 노드에 저장
+                        needVisit = [...needVisit, ...connected];
+                    };
+                };
+                console.log(visited)
+                for(let i = 0; i < visited.length; i++) visited[i][3] = m;
+            };
         };
     }
 
@@ -297,8 +337,9 @@ export class Dialog{
             key === 'ArrowLeft' ||
             key === 'ArrowRight'
         ){
+            // 방향키에 따른 애벌레가 움직이게 될 좌표를 배열에 저장
+            // 즉시 움직이게 될 위치좌표가 배열의 첫번째 요소
             let wormCordArr = new Array;
-
             if(
                 key === 'ArrowUp' &&
                 this.prev0Cord.y >= 2 &&
@@ -323,13 +364,17 @@ export class Dialog{
                 this.prev0Cord.x + 1 !== this.prev1Cord.x
             ){
                 this.target = this.prev0Cord.clone().moveRight();
-            }else{
+            }
+                // 누른키가 방향키이기는 하지만 갈 수 없는 곳이거나 바로 후퇴의 경우 실행
+                else
+            {
                 this.target = this.prev0Cord.clone();
                 this.prev0Cord = this.prev1Cord.clone();
                 this.prev1Cord = this.prev2Cord.clone();
                 this.prev2Cord = this.prev3Cord.clone();
             };
 
+            // 배열의 첫번째 요소로 즉시 이동할 좌표를 저장
             wormCordArr.push([
                 this.target.clone(),
                 this.prev0Cord.clone(),
@@ -338,21 +383,19 @@ export class Dialog{
             ]);
 
             // 벌레먹은 파트는 3번째 인자값을 false로 변경하여 화면에 표출하지 않도록 함
-            let headCord = [this.target.x, this.target.y];
-            woodCords.some((woodCord, i) => {
-                if(this.isExistinArr(woodCord, headCord)){
-                    woodCords[i][2] = false;
-                };
-            });
-            
-            console.log(wormCordArr[0])
-            console.log([this.target, this.prev0Cord, this.prev1Cord, this.prev2Cord])
+            this.hideEaten(woodCords, [this.target.x, this.target.y]);
+
+            this.divMass(woodCords)
+
+            console.log(woodCords)
+
             // 애벌레 활동 가능 최대 높이가 10 이므로 최대 10번 반복
             for(let h = 0; h < 10; h++){
                 if(
+                    // 낙하 완료인지 판단하기 위해 wormCordArr[0]이 아닌 this를 가져와서 대조
                     this.isWormFall(
-                        [this.target, this.prev0Cord, this.prev1Cord, this.prev2Cord], 
-                        woodCords
+                        woodCords, 
+                        [this.target, this.prev0Cord, this.prev1Cord, this.prev2Cord]
                     )
                 ){
                     // 낙하 상황 시 한단계 떨어진 좌표를 배열에 저장
