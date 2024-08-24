@@ -200,10 +200,18 @@ export class Dialog{
                         needVisit = [...needVisit, ...connected];
                     };
                 };
-                console.log(visited)
                 for(let i = 0; i < visited.length; i++) visited[i][3] = m;
             };
         };
+
+        this.isWoodFall = (woodCords, index) => {
+            // 이번 덩어리 순번에 해당하는 나무블록들을 추출
+            let indexWoods = woodCords.filter(wood => wood[3] === index);
+
+            // 각 나무블록에 대하여 낙하여부를 판단
+            let n = 0;
+            for(let w = 0; w < indexWoods.length; w++){}
+        }
     }
 
     setBase(stageWidth, stageHeight){
@@ -385,9 +393,25 @@ export class Dialog{
             // 벌레먹은 파트는 3번째 인자값을 false로 변경하여 화면에 표출하지 않도록 함
             this.hideEaten(woodCords, [this.target.x, this.target.y]);
 
-            this.divMass(woodCords)
+            // 나무들의 덩어리별로 번호를 지정
+            this.divMass(woodCords);
 
-            console.log(woodCords)
+            // 나무들의 소속번호 중 가장 큰 값을 찾음. 이 번호는 곧 나무덩어리의 개수를 의미함
+            let massMap = woodCords.map(wood => wood[3]);
+            var massCount = massMap[0];
+            for (let i = 0; i < massMap.length; i++) {
+                if(massMap[i] > massCount) massCount = massMap[i];
+            };
+
+            // 나무 덩어리의 낙하여부를 판단. 나무 덩어리 개수만큼 반복
+            for (let i = 1; i < massCount + 1; i++) {
+                if(
+                    this.isWoodFall(woodCords, i)
+                ){
+
+                }
+            };
+            console.log(woodCords);
 
             // 애벌레 활동 가능 최대 높이가 10 이므로 최대 10번 반복
             for(let h = 0; h < 10; h++){
