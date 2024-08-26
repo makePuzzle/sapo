@@ -434,7 +434,6 @@ export class Dialog{
 
             // 나무들의 덩어리별로 번호를 지정
             this.divMass(woodCords);
-            console.log(woodCords);
 
             // 나무들의 소속번호 중 가장 큰 값을 찾음. 이 번호는 곧 나무덩어리의 개수를 의미함
             let massMap = woodCords.map(wood => wood[3]);
@@ -442,48 +441,9 @@ export class Dialog{
             for(let i = 0; i < massMap.length; i++){
                 if(massMap[i] > massCount) massCount = massMap[i];
             };
-            console.log(massCount);
 
             // 애벌레 활동 가능 최대 높이가 10 이므로 최대 10번 반복
             for(let h = 0; h < 10; h++){
-
-                // 나무 덩어리의 낙하여부를 판단. 나무 덩어리 개수만큼 반복
-                for(let index = 1; index < massCount + 1; index++){
-                    console.log(
-                        index,
-                        this.isWoodFall(
-                            woodCords, 
-                            wormCordArr[wormCordArr.length - 1], 
-                            index
-                        ),
-                        woodCords.filter(wood => wood[3] === index)
-                    );
-                    if(
-                        this.isWoodFall(
-                            woodCords, 
-                            wormCordArr[wormCordArr.length - 1], 
-                            index
-                        )
-                    ){
-                        // 이번 덩어리 순번에 해당하는 나무블록들을 추출
-                        let indexWoods = woodCords.filter(wood => wood[3] === index);
-
-                        // 덩어리 중 아래 나무블록들부터 떨어지도록 반복문을 역으로 진행
-                        for(let iw = indexWoods.length - 1; iw >= 0; iw--){
-                            // indexWood = 떨어질 나무 블록들
-                            let indexWood = indexWoods[iw];
-                            indexWood[2] = false;
-
-                            // fallenWood = 나무블록들의 떨어질 위치
-                            let fallenWood = woodCords.find(wood => 
-                                wood[0] === indexWood[0] && 
-                                wood[1] === indexWood[1] + 1
-                            );
-                            fallenWood[2] = true;
-                        };
-                    };
-                };
-
                 // 낙하 완료인지 판단하기 위해 wormCordArr[0]이 아닌 this를 가져와서 대조
                 if(
                     this.isWormFall(
@@ -510,6 +470,38 @@ export class Dialog{
                     break;
                 };
             };
+
+            // 나무블록 위치 가능 최대 높이가 6 이므로 최대 6번 반복
+            for(let h = 0; h < 6; h++){
+                // 나무 덩어리의 낙하여부를 판단. 나무 덩어리 개수만큼 반복
+                for(let index = 1; index < massCount + 1; index++){
+                    if(
+                        this.isWoodFall(
+                            woodCords, 
+                            wormCordArr[wormCordArr.length - 1], 
+                            index
+                        )
+                    ){
+                        // 이번 덩어리 순번에 해당하는 나무블록들을 추출
+                        let indexWoods = woodCords.filter(wood => wood[3] === index);
+
+                        // 덩어리 중 아래 나무블록들부터 떨어지도록 반복문을 역으로 진행
+                        for(let iw = indexWoods.length - 1; iw >= 0; iw--){
+                            // indexWood = 떨어질 나무 블록들
+                            let indexWood = indexWoods[iw];
+                            indexWood[2] = false;
+
+                            // fallenWood = 나무블록들의 떨어질 위치
+                            let fallenWood = woodCords.find(wood => 
+                                wood[0] === indexWood[0] && 
+                                wood[1] === indexWood[1] + 1
+                            );
+                            fallenWood[2] = true;
+                        };
+                    };
+                };
+            };
+            console.log(woodCords);
 
             return wormCordArr;
         }
