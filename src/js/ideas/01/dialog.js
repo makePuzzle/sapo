@@ -215,6 +215,7 @@ export class Dialog{
             let xCords = [...new Set(indexWoods.map(wood => wood[0]))];
 
             let n = 0;
+            let fallGaps = new Array;
             // 나무블록이 존재하는 x 축에서
             for(let x = 0; x < xCords.length; x++){
                 // 가장 하단에 존재하는 나무 블록들에 대하여 낙하여부를 판단
@@ -225,6 +226,7 @@ export class Dialog{
                 for(let y = 0; y < yCords.length; y++){
                     if(yCords[y] > biggestY) biggestY = yCords[y];
                 };
+                // 이번 x축상 최하단 나무블록의 좌표 = [XCords[x], biggestY]
                 
                 // 이번 x축 상에 남아있는 나무 블록들
                 let surviveX = woodCords.filter(wood => wood[2] === true && wood[0] === xCords[x]);
@@ -237,19 +239,42 @@ export class Dialog{
                 ){
                     n++;
                 }else if(
-                    // 최하단 블록 아래에 worm 이 있는 경우
+                    // 최하단 블록 바로 아래에 worm 이 있는 경우
                     wormCords.some(worm => this.isSameCord([worm.x, worm.y], [xCords[x], biggestY + 1]))
                 ){
                     n++;
                 }else{
                     // 나무블록 아래에 아무 블록도 없는 경우
                     n = n;
+                    // 이번 x축상에 살아남은 나무블록 중 최하단 나무블록보다 아래있는 블록들
+                    let underWoods = surviveX.filter(wood => wood[1] > biggestY).map(wood => wood[1]);
+                    let underWorms = wormCords.filter(worm => worm.x == xCords[x] && worm.y > biggestY).map(worm => worm.y);
+                    let underBlocks = [...underWoods, ... underWorms];
+                    
+                    if(underBlocks.length != 0){
+                        // underBlocks가 있는 경우 fallGap을 계산한 값을 배열에 저장
+                        let temp_fallGap = underBlocks[0] - biggestY - 1;
+                        for(let u = 0; u < underBlocks.length; u++){
+                            if(underBlocks[u] - biggestY - 1 < temp_fallGap) temp_fallGap = underBlocks[u] - biggestY - 1;
+                        };
+                        fallGaps.push(temp_fallGap);
+                    }else{
+                        // underBlocks가 없는 경우 바닥값을 closestFloor로 간주하고 그 차이를 계산한 값을 배열에 저장
+                        fallGaps.push(12 - biggestY - 1);
+                    };
                 };
             };
 
             // 하나의 나무블록이라도 어딘가에 걸쳐있다면 n 값이 증가
             // n 값이 0 그대로라면 낙하
-            return n === 0 ? true : false;
+            // fallGaps의 요소 중 가장 작은 값만 반환
+            let min_fallGap;
+            fallGaps.length == 0 ? min_fallGap = 0 : min_fallGap = fallGaps[0];
+            
+            for(let f = 0; f < fallGaps.length; f++){
+                if(fallGaps[f] < min_fallGap) min_fallGap = fallGaps[f];
+            };
+            return [n === 0 ? true : false, min_fallGap];
         };
     }
 
@@ -337,7 +362,7 @@ export class Dialog{
         );
 
         // draw ground
-        ctx.fillStyle = `#b196ff`;
+        ctx.fillStyle = `#cdbddb`;
         for(let i = 0; i < groundCords.length; i++){
             ctx.fillRect(
                 this.posAsCord(groundCords[i][0], "x"),
@@ -348,7 +373,15 @@ export class Dialog{
 
         // draw wood
         // woodCords는 외부 파일에서 가져옴 / 문제에 따라 블록개수 다르게 생성
-        ctx.fillStyle = `#cdbddb`;
+        if(
+            // 정답과 같은지 확인하는 코드.
+            // 정답과 일치하면 축하 창과 다음 문제로 넘어가는 코드 작성해야됨.
+            this.compare(woodCords, quizLogic)
+        ){
+            ctx.fillStyle = `#b196ff`;
+        }else{
+            ctx.fillStyle = `#795548`;
+        };
         for(let i = 0; i < woodCords.length; i++){
             if(woodCords[i][2]){
                 ctx.fillRect(
@@ -360,7 +393,7 @@ export class Dialog{
         };
 
         // draw quiz
-        ctx.fillStyle = `#cdbddb`;
+        ctx.fillStyle = `#b196ff`;
         for(let i = 0; i < quizCords.length; i++){
             ctx.fillRect(
                 this.posAsCord(quizCords[i][0], "x"),
@@ -368,10 +401,6 @@ export class Dialog{
                 this.WIDTH, this.HEIGHT
             );
         };
-
-        // 정답과 같은지 확인하는 코드.
-        // 정답과 일치하면 축하 창과 다음 문제로 넘어가는 코드 작성해야됨.
-        console.log(this.compare(woodCords, quizLogic));
     }
 
     arrowKeyDown(key){
@@ -471,37 +500,64 @@ export class Dialog{
                 };
             };
 
-            // 나무블록 위치 가능 최대 높이가 6 이므로 최대 6번 반복
-            for(let h = 0; h < 6; h++){
-                // 나무 덩어리의 낙하여부를 판단. 나무 덩어리 개수만큼 반복
-                for(let index = 1; index < massCount + 1; index++){
-                    if(
-                        this.isWoodFall(
-                            woodCords, 
-                            wormCordArr[wormCordArr.length - 1], 
-                            index
-                        )
-                    ){
-                        // 이번 덩어리 순번에 해당하는 나무블록들을 추출
-                        let indexWoods = woodCords.filter(wood => wood[3] === index);
+            // 나무 덩어리의 낙하여부를 판단. 나무 덩어리 개수만큼 반복
+            for(let index = 1; index < massCount + 1; index++){
+                let result_woodFall = this.isWoodFall(
+                    woodCords, 
+                    wormCordArr[wormCordArr.length - 1], 
+                    index
+                );
+                let isFall = result_woodFall[0];
+                let howMany = result_woodFall[1];
+                console.log(result_woodFall)
+                if( isFall ){
+                    // 이번 덩어리 순번에 해당하는 나무블록들을 추출
+                    let indexWoods = woodCords.filter(wood => wood[3] === index);
 
-                        // 덩어리 중 아래 나무블록들부터 떨어지도록 반복문을 역으로 진행
-                        for(let iw = indexWoods.length - 1; iw >= 0; iw--){
-                            // indexWood = 떨어질 나무 블록들
-                            let indexWood = indexWoods[iw];
-                            indexWood[2] = false;
+                    // 덩어리 중 아래 나무블록들부터 떨어지도록 반복문을 역으로 진행
+                    for(let iw = indexWoods.length - 1; iw >= 0; iw--){
+                        // indexWood = 떨어질 나무 블록들
+                        let indexWood = indexWoods[iw];
+                        indexWood[2] = false;
 
-                            // fallenWood = 나무블록들의 떨어질 위치
-                            let fallenWood = woodCords.find(wood => 
-                                wood[0] === indexWood[0] && 
-                                wood[1] === indexWood[1] + 1
-                            );
-                            fallenWood[2] = true;
-                        };
+                        // fallenWood = 나무블록들의 떨어질 위치
+                        let fallenWood = woodCords.find(wood => 
+                            wood[0] === indexWood[0] && 
+                            wood[1] === indexWood[1] + howMany
+                        );
+                        fallenWood[2] = true;
                     };
                 };
             };
-            console.log(woodCords);
+
+            // 나무 덩어리 낙하 후 애벌레 낙하 한번 더 반복
+            for(let h = 0; h < 10; h++){
+                // 낙하 완료인지 판단하기 위해 wormCordArr[0]이 아닌 this를 가져와서 대조
+                if(
+                    this.isWormFall(
+                        woodCords, 
+                        [this.target, this.prev0Cord, this.prev1Cord, this.prev2Cord]
+                    )
+                ){
+                    // 낙하 상황 시 한단계 떨어진 좌표를 배열에 저장
+                    wormCordArr.push([
+                        this.target.clone().moveDown(),
+                        this.prev0Cord.clone().moveDown(),
+                        this.prev1Cord.clone().moveDown(),
+                        this.prev2Cord.clone().moveDown()
+                    ]);
+
+                    // 낙하가 종료되었는지 판단하기 위해 변화값을 this에 저장하지만
+                    // 저장한 내용이 즉시 애니메이션에 반영되는것은 아니고 그 과정을 배열에 저장하고 반환함.
+                    this.target = this.target.clone().moveDown();
+                    this.prev0Cord = this.prev0Cord.clone().moveDown();
+                    this.prev1Cord = this.prev1Cord.clone().moveDown();
+                    this.prev2Cord = this.prev2Cord.clone().moveDown();
+                }else{
+                    // 지지 상황 시 반복문 중지
+                    break;
+                };
+            };
 
             return wormCordArr;
         }
