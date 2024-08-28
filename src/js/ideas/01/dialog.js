@@ -269,8 +269,9 @@ export class Dialog{
             // n 값이 0 그대로라면 낙하
             // fallGaps의 요소 중 가장 작은 값만 반환
             let min_fallGap;
+            console.log(fallGaps)
             fallGaps.length == 0 ? min_fallGap = 0 : min_fallGap = fallGaps[0];
-            
+
             for(let f = 0; f < fallGaps.length; f++){
                 if(fallGaps[f] < min_fallGap) min_fallGap = fallGaps[f];
             };
@@ -332,7 +333,7 @@ export class Dialog{
         this.prev3Cord = wormCordEl[3];
     }
 
-    animate(ctx){
+    animate(ctx, setKeyLock){
         ctx.beginPath();
 
         // draw worm dynamically
@@ -378,18 +379,30 @@ export class Dialog{
             // 정답과 일치하면 축하 창과 다음 문제로 넘어가는 코드 작성해야됨.
             this.compare(woodCords, quizLogic)
         ){
+            // 정답 일치
             ctx.fillStyle = `#b196ff`;
+            for(let i = 0; i < woodCords.length; i++){
+                if(woodCords[i][2]){
+                    ctx.fillRect(
+                        this.posAsCord(woodCords[i][0], "x"),
+                        this.posAsCord(woodCords[i][1], "y"),
+                        this.WIDTH, this.HEIGHT
+                    );
+                }
+            };
+            setKeyLock(true);
         }else{
+            // 정답 불일치
             ctx.fillStyle = `#795548`;
-        };
-        for(let i = 0; i < woodCords.length; i++){
-            if(woodCords[i][2]){
-                ctx.fillRect(
-                    this.posAsCord(woodCords[i][0], "x"),
-                    this.posAsCord(woodCords[i][1], "y"),
-                    this.WIDTH, this.HEIGHT
-                );
-            }
+            for(let i = 0; i < woodCords.length; i++){
+                if(woodCords[i][2]){
+                    ctx.fillRect(
+                        this.posAsCord(woodCords[i][0], "x"),
+                        this.posAsCord(woodCords[i][1], "y"),
+                        this.WIDTH, this.HEIGHT
+                    );
+                }
+            };
         };
 
         // draw quiz
@@ -509,7 +522,7 @@ export class Dialog{
                 );
                 let isFall = result_woodFall[0];
                 let howMany = result_woodFall[1];
-                console.log(result_woodFall)
+                
                 if( isFall ){
                     // 이번 덩어리 순번에 해당하는 나무블록들을 추출
                     let indexWoods = woodCords.filter(wood => wood[3] === index);

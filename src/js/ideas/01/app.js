@@ -12,9 +12,10 @@ export default class App_01 extends Component{
         this.ctx = this.canvas.getContext("2d");
         
         this.pressKey = null;
-        this.keying = false;
+        this.keyLock = false;
+        this.setKeyLock = this.setKeyLock.bind(this);
 
-        // Dialog들이 들어있는 items 배열 구성
+        // dialog를 this에 생성
         this.dialog = new Dialog();
 
         // 창 크기 변화 인식 후 그에 맞춰 화면 재구성
@@ -25,6 +26,10 @@ export default class App_01 extends Component{
 
         // 방향키 인식
         document.addEventListener('keyup', this.arrowPress.bind(this), false);
+    }
+
+    setKeyLock(bool){
+        this.keyLock = bool;
     }
 
     resize(){
@@ -52,12 +57,12 @@ export default class App_01 extends Component{
         this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
 
         // Dialog > animate
-        this.dialog.animate(this.ctx);
+        this.dialog.animate(this.ctx, this.setKeyLock);
     }
 
     arrowPress(e){
-        if(!this.keying){
-            this.keying = true;
+        if(!this.keyLock){
+            this.setKeyLock(true);
             this.pressKey = e.key;
 
             // 눌린 버튼이 방향키라면 this.startCord, this.prevCord, this.target 반환
@@ -67,12 +72,12 @@ export default class App_01 extends Component{
             if(wormCordArr){
                 if(wormCordArr.length === 1){
                     this.dialog.setPosAsCords(wormCordArr[0]);
-                    this.keying = false;
+                    this.keyLock = false;
                 }else if(wormCordArr.length > 1){
                     this.dialog.setPosAsCords(wormCordArr[0]);
                     setTimeout(() => {
                         this.dialog.setPosAsCords(wormCordArr[wormCordArr.length-1]);
-                        this.keying = false;
+                        this.setKeyLock(false);
                     }, 200);
                 }
             }
