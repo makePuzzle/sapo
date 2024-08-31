@@ -12,8 +12,18 @@ export default class App_01 extends Component{
         this.ctx = this.canvas.getContext("2d");
         
         this.pressKey = null;
+
         this.keyLock = false;
         this.setKeyLock = this.setKeyLock.bind(this);
+
+        this.isCorrect = false;
+        this.setIsCorrect = this.setIsCorrect.bind(this);
+
+        this.isWait = false;
+        this.setIsWait = this.setIsWait.bind(this);
+
+        this.quizNumber = -1;
+        this.setQuizNumber = this.setQuizNumber.bind(this);
 
         // dialog를 this에 생성
         this.dialog = new Dialog();
@@ -28,9 +38,25 @@ export default class App_01 extends Component{
         document.addEventListener('keyup', this.arrowPress.bind(this), false);
     }
 
+    // 키 입력 잠금 장치
     setKeyLock(bool){
         this.keyLock = bool;
-    }
+    };
+
+    // 정답인지 알리는 장치
+    setIsCorrect(bool){
+        this.isCorrect = bool;
+    };
+
+    // 애니메이션 대기 화면인지 알리는 장치
+    setIsWait(bool){
+        this.isWait = bool;
+    };
+
+    // 퀴즈번호를 변경하는 장치
+    setQuizNumber(num){
+        this.quizNumber = num;
+    };
 
     resize(){
         // 브라우저 창 크기에 따른 canvas의 너비 높이 설정
@@ -49,16 +75,62 @@ export default class App_01 extends Component{
 
         const startwormCord = this.dialog.setBase(this.stageWidth, this.stageHeight);
         this.dialog.setPosAsCords(startwormCord);
-    }
+    };
 
     animate(){
         window.requestAnimationFrame(this.animate.bind(this));
 
-        this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
+        if(!this.isWait){
+            this.ctx.clearRect(0, 0, this.stageWidth, this.stageHeight);
+    
+            // Dialog > animate
+            this.dialog.animate(this.ctx, this.setKeyLock, this.setIsCorrect);
+        };
 
-        // Dialog > animate
-        this.dialog.animate(this.ctx, this.setKeyLock);
-    }
+        console.log(this.isCorrect, this.quizNumber, !this.isWait)
+        console.log((this.isCorrect || this.quizNumber == -1) && !this.isWait)
+        // 정답이거나 첫문제일경우 실행
+        if((this.isCorrect || this.quizNumber == -1) && !this.isWait){
+            // 애니메이션 대기 설정
+            this.setIsWait(true);
+
+            // 정답 신호 해제
+            this.setIsCorrect(false);
+            
+            // 첫 문제의 경우 딜레이 없이 좌표값 세팅
+            if(this.quizNumber == -1){
+                // 퀴즈번호 증가
+                this.setQuizNumber(this.quizNumber + 1);
+
+                // 애니메이션 대기 해제
+                this.setIsWait(false);
+
+                // 다음 퀴즈에 해당하는 좌표에 따라 블록을 그려냄
+                this.dialog.setCords(this.quizNumber);
+
+                // 방향키 입력 잠금 해제
+                this.setKeyLock(false);
+            }
+            // 이후 문제들에 관하여는 2초뒤에 문제가 세팅 되도록함
+            else{
+                // 2초 뒤에 실행
+                setTimeout(() => {
+                    console.log('settimeout')
+                    // 퀴즈번호 증가
+                    this.setQuizNumber(this.quizNumber + 1);
+                    
+                    // 다음 퀴즈에 해당하는 좌표에 따라 블록을 그려냄
+                    this.dialog.setCords(this.quizNumber);
+
+                    // 방향키 입력 잠금 해제
+                    this.setKeyLock(false);
+                }, 2000);
+
+                // 애니메이션 대기 해제
+                this.setIsWait(false);
+            }
+        };
+    };
 
     arrowPress(e){
         if(!this.keyLock){
@@ -76,17 +148,17 @@ export default class App_01 extends Component{
                 }else if(wormCordArr.length > 1){
                     this.dialog.setPosAsCords(wormCordArr[0]);
                     setTimeout(() => {
-                        this.dialog.setPosAsCords(wormCordArr[wormCordArr.length-1]);
+                        this.dialog.setPosAsCords(wormCordArr[wormCordArr.length - 1]);
                         this.setKeyLock(false);
                     }, 200);
                 }
             }
         }
-    }
+    };
 
     render(){
         return(
             <div></div>
         )
-    }
+    };
 }
